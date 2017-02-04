@@ -1,6 +1,0 @@
-# Homebrew setting
-export HOMEBREW_CASK_OPTS="--appdir=/Applications"
-
-# Java SDK setting
-export JAVA_HOME=`/usr/libexec/java_home`
-
