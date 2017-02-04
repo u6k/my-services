@@ -1,8 +1,0 @@
-- name: install mysql
-  apt: name=mysql-server update_cache=yes state=latest
-  with_items:
-    - python-mysqldb
-    - libmysqlclient-dev
-    - libmysqld-dev
-    - libmysql++-dev
-    - mysql-server
