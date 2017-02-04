@@ -1,3 +1,0 @@
-# JavaSDK
-- name: install jdk
-  apt: name=openjdk-7-jdk update_cache=yes state=latest
