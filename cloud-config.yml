@@ -35,6 +35,31 @@ write_files:
         -v /var/run/docker.sock:/var/run/docker.sock:ro \
         --volumes-from nginx-proxy \
         u6kapps/letsencrypt-nginx-proxy-companion
+  - path: /opt/bin/docker-redmine-mysql.sh
+    permissions: 0744
+    content: |
+      #!/bin/sh
+      docker run \
+        --name redmine-mysql \
+        -v $DOCKER_VOLUME_PATH/redmine-mysql:/var/lib/mysql \
+        -e MYSQL_ROOT_PASSWORD=$REDMINE_MYSQL_PASS \
+        -e MYSQL_DATABASE=redmine \
+        u6kapps/redmine-mysql
+  - path: /opt/bin/docker-redmine.sh
+    permissions: 0744
+    content: |
+      #!/bin/sh
+      docker run \
+        --name redmine \
+        --link redmine-mysql:db \
+        -v $DOCKER_VOLUME_PATH/redmine:/usr/src/redmine/files \
+        -e REDMINE_DB_MYSQL=db \
+        -e REDMINE_DB_PASSWORD=$REDMINE_MYSQL_PASS \
+        -e VIRTUAL_HOST=redmine.u6k.me \
+        -e VIRTUAL_PORT=3000 \
+        -e LETSENCRYPT_HOST=redmine.u6k.me \
+        -e LETSENCRYPT_EMAIL=u6k.apps@gmail.com \
+        u6kapps/redmine
 coreos:
   units:
     - name: etcd.service
@@ -89,6 +114,40 @@ coreos:
         ExecStartPre=-/usr/bin/docker rm letsencrypt-nginx-proxy-companion
         ExecStartPre=/usr/bin/docker pull u6kapps/letsencrypt-nginx-proxy-companion
         ExecStart=/opt/bin/docker-letsencrypt-nginx-proxy-companion.sh
+        [Install]
+        WantedBy=multi-user.target
+    - name: docker-redmine-mysql.service
+      command: start
+      content: |
+        [Unit]
+        Description=redmine-mysql container
+        Documentation=https://github.com/u6k/redmine
+        Requires=docker.service
+        After=docker.service
+        [Service]
+        Type=simple
+        EnvironmentFile=/etc/environment
+        ExecStartPre=-/usr/bin/docker stop redmine-mysql
+        ExecStartPre=-/usr/bin/docker rm redmine-mysql
+        ExecStartPre=/usr/bin/docker pull u6kapps/redmine-mysql
+        ExecStart=/opt/bin/docker-redmine-mysql.sh
+        [Install]
+        WantedBy=multi-user.target
+    - name: docker-redmine.service
+      command: start
+      content: |
+        [Unit]
+        Description=redmine container
+        Documentation=https://github.com/u6k/redmine
+        Requires=docker.service docker-redmine-mysql.service
+        After=docker.service docker-redmine-mysql.service
+        [Service]
+        Type=simple
+        EnvironmentFile=/etc/environment
+        ExecStartPre=-/usr/bin/docker stop redmine
+        ExecStartPre=-/usr/bin/docker rm redmine
+        ExecStartPre=/usr/bin/docker pull u6kapps/redmine
+        ExecStart=/opt/bin/docker-redmine.sh
         [Install]
         WantedBy=multi-user.target
 
