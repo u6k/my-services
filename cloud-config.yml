@@ -74,6 +74,29 @@ write_files:
         -e LETSENCRYPT_HOST=jenkins.u6k.me \
         -e LETSENCRYPT_EMAIL=u6k.apps@gmail.com \
         u6kapps/jenkins
+  - path: /opt/bin/docker-owncloud-mysql.sh
+    permissions: 0744
+    content: |
+      #!/bin/sh
+      docker run \
+        --name owncloud-mysql \
+        -v $DOCKER_VOLUME_PATH/owncloud-mysql:/var/lib/mysql \
+        -e MYSQL_ROOT_PASSWORD=$OWNCLOUD_MYSQL_PASS \
+        -e MYSQL_DATABASE=owncloud \
+        u6kapps/owncloud-mysql
+  - path: /opt/bin/docker-owncloud.sh
+    permissions: 0744
+    content: |
+      #!/bin/sh
+      docker run \
+        --name owncloud \
+        --link owncloud-mysql:mysql \
+        -v $DOCKER_VOLUME_PATH/owncloud:/var/www/html \
+        -e VIRTUAL_HOST=owncloud.u6k.me \
+        -e VIRTUAL_PORT=80 \
+        -e LETSENCRYPT_HOST=owncloud.u6k.me \
+        -e LETSENCRYPT_EMAIL=u6k.apps@gmail.com \
+        u6kapps/owncloud
 coreos:
   units:
     - name: etcd.service
@@ -179,6 +202,40 @@ coreos:
         ExecStartPre=-/usr/bin/docker rm jenkins
         ExecStartPre=/usr/bin/docker pull u6kapps/jenkins
         ExecStart=/opt/bin/docker-jenkins.sh
+        [Install]
+        WantedBy=multi-user.target
+    - name: docker-owncloud-mysql.service
+      command: start
+      content: |
+        [Unit]
+        Description=owncloud-mysql container
+        Documentation=https://github.com/u6k/owncloud
+        Requires=docker.service
+        After=docker.service
+        [Service]
+        Type=simple
+        EnvironmentFile=/etc/environment
+        ExecStartPre=-/usr/bin/docker stop owncloud-mysql
+        ExecStartPre=-/usr/bin/docker rm owncloud-mysql
+        ExecStartPre=/usr/bin/docker pull u6kapps/owncloud-mysql
+        ExecStart=/opt/bin/docker-owncloud-mysql.sh
+        [Install]
+        WantedBy=multi-user.target
+    - name: docker-owncloud.service
+      command: start
+      content: |
+        [Unit]
+        Description=owncloud container
+        Documentation=https://github.com/u6k/owncloud
+        Requires=docker.service docker-owncloud-mysql.service
+        After=docker.service docker-owncloud-mysql.service
+        [Service]
+        Type=simple
+        EnvironmentFile=/etc/environment
+        ExecStartPre=-/usr/bin/docker stop owncloud
+        ExecStartPre=-/usr/bin/docker rm owncloud
+        ExecStartPre=/usr/bin/docker pull u6kapps/owncloud
+        ExecStart=/opt/bin/docker-owncloud.sh
         [Install]
         WantedBy=multi-user.target
 
