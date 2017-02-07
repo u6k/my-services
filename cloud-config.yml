@@ -60,6 +60,20 @@ write_files:
         -e LETSENCRYPT_HOST=redmine.u6k.me \
         -e LETSENCRYPT_EMAIL=u6k.apps@gmail.com \
         u6kapps/redmine
+  - path: /opt/bin/docker-jenkins.sh
+    permissions: 0744
+    content: |
+      #!/bin/sh
+      docker run \
+        --name jenkins \
+        -v $DOCKER_VOLUME_PATH/jenkins:/root/.jenkins \
+        -v /var/run/docker.sock:/var/run/docker.sock:ro \
+        -v $(which docker):/usr/bin/docker:ro \
+        -e VIRTUAL_HOST=jenkins.u6k.me \
+        -e VIRTUAL_PORT=8080 \
+        -e LETSENCRYPT_HOST=jenkins.u6k.me \
+        -e LETSENCRYPT_EMAIL=u6k.apps@gmail.com \
+        u6kapps/jenkins
 coreos:
   units:
     - name: etcd.service
@@ -148,6 +162,23 @@ coreos:
         ExecStartPre=-/usr/bin/docker rm redmine
         ExecStartPre=/usr/bin/docker pull u6kapps/redmine
         ExecStart=/opt/bin/docker-redmine.sh
+        [Install]
+        WantedBy=multi-user.target
+    - name: docker-jenkins.service
+      command: start
+      content: |
+        [Unit]
+        Description=jenkins container
+        Documentation=https://github.com/u6k/jenkins
+        Requires=docker.service
+        After=docker.service
+        [Service]
+        Type=simple
+        EnvironmentFile=/etc/environment
+        ExecStartPre=-/usr/bin/docker kill jenkins
+        ExecStartPre=-/usr/bin/docker rm jenkins
+        ExecStartPre=/usr/bin/docker pull u6kapps/jenkins
+        ExecStart=/opt/bin/docker-jenkins.sh
         [Install]
         WantedBy=multi-user.target
 
