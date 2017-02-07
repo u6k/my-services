@@ -10,6 +10,31 @@ write_files:
       REDMINE_MYSQL_PASS=secret
       OWNCLOUD_MYSQL_PASS=secret
       ZABBIX_DB_PASS=secret
+  - path: /opt/bin/docker-nginx-proxy.sh
+    permissions: 0744
+    content: |
+      #!/bin/sh
+      docker run \
+        --name nginx-proxy \
+        --privileged \
+        -p 80:80 \
+        -p 443:443 \
+        -v $DOCKER_VOLUME_PATH/nginx-proxy:/etc/nginx/certs:ro \
+        -v /etc/nginx/vhost.d \
+        -v /usr/share/nginx/html \
+        -v /var/run/docker.sock:/tmp/docker.sock:ro \
+        u6kapps/nginx-proxy
+  - path: /opt/bin/docker-letsencrypt-nginx-proxy-companion.sh
+    permissions: 0744
+    content: |
+      #!/bin/sh
+      docker run \
+        --name letsencrypt-nginx-proxy-companion \
+        --privileged \
+        -v $DOCKER_VOLUME_PATH/nginx-proxy:/etc/nginx/certs:rw \
+        -v /var/run/docker.sock:/var/run/docker.sock:ro \
+        --volumes-from nginx-proxy \
+        u6kapps/letsencrypt-nginx-proxy-companion
 coreos:
   units:
     - name: etcd.service
@@ -32,6 +57,40 @@ coreos:
         What=/dev/disk/by-uuid/5384dc84-1c48-459f-b337-c5839a76162f
         Where=/mnt/data
         Type=ext4
+    - name: docker-nginx-proxy.service
+      command: start
+      content: |
+        [Unit]
+        Description=nginx-proxy container
+        Documentation=https://github.com/u6k/nginx-proxy
+        Requires=docker.service
+        After=docker.service
+        [Service]
+        Type=simple
+        EnvironmentFile=/etc/environment
+        ExecStartPre=-/usr/bin/docker stop nginx-proxy
+        ExecStartPre=-/usr/bin/docker rm nginx-proxy
+        ExecStartPre=/usr/bin/docker pull u6kapps/nginx-proxy
+        ExecStart=/opt/bin/docker-nginx-proxy.sh
+        [Install]
+        WantedBy=multi-user.target
+    - name: docker-letsencrypt-nginx-proxy-companion.service
+      command: start
+      content: |
+        [Unit]
+        Description=letsencrypt-nginx-proxy-companion container
+        Documentation=https://github.com/u6k/nginx-proxy
+        Requires=docker.service docker-nginx-proxy.service
+        After=docker.service docker-nginx-proxy.service
+        [Service]
+        Type=simple
+        EnvironmentFile=/etc/environment
+        ExecStartPre=-/usr/bin/docker stop letsencrypt-nginx-proxy-companion
+        ExecStartPre=-/usr/bin/docker rm letsencrypt-nginx-proxy-companion
+        ExecStartPre=/usr/bin/docker pull u6kapps/letsencrypt-nginx-proxy-companion
+        ExecStart=/opt/bin/docker-letsencrypt-nginx-proxy-companion.sh
+        [Install]
+        WantedBy=multi-user.target
 
 users:
   - name: u6k
