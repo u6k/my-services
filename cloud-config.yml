@@ -2,6 +2,14 @@
 
 hostname: coreos
 
+write_files:
+  - path: /etc/environment
+    permissions: 0644
+    content: |
+      DOCKER_VOLUME_PATH=/var/docker-volumes
+      REDMINE_MYSQL_PASS=secret
+      OWNCLOUD_MYSQL_PASS=secret
+      ZABBIX_DB_PASS=secret
 coreos:
   units:
     - name: etcd.service
