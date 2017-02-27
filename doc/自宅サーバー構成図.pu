@@ -1,0 +1,86 @@
+@startuml
+
+title: 自宅サーバー構造図
+
+actor "ユーザー"
+actor "管理者"
+
+interface "HTTPS"
+interface "SSH (管理用)"
+interface "SSH (GitLab用)"
+
+node "MacBookPro" {
+    component "macOS" {
+        component "VirtualBox" {
+            component "CoreOS" {
+                component "sshd"
+
+                package "リバースプロキシー" {
+                    [nginx-proxy] <<Dockerコンテナ>>
+                    [letsencrypt] <<Dockerコンテナ>>
+                }
+
+                package "ソースコード管理、ビルド基盤" {
+                    [gitlab-ce] <<Dockerコンテナ>>
+                    [gitlab-runner] <<Dockerコンテナ>>
+                    [registry] <<Dockerコンテナ>>
+                    [docker-registry-frontend] <<Dockerコンテナ>>
+                }
+
+                package "ジョブ管理" {
+                    [jenkins-dood] <<Dockerコンテナ>>
+                }
+
+                package "ファイル管理" {
+                    [owncloud] <<Dockerコンテナ>>
+                    [mysql (owncloud)] <<Dockerコンテナ>>
+                }
+
+                package "プロジェクト管理" {
+                    [redmine] <<Dockerコンテナ>>
+                    [mysql (redmine)] <<Dockerコンテナ>>
+                }
+
+                package "監視基盤" {
+                    [zabbix-3.0] <<Dockerコンテナ>>
+                    [zabbix-db-mariadb] <<Dockerコンテナ>>
+                    [zabbix-agent-xxl-limited] <<Dockerコンテナ>>
+                }
+
+                database "/mnt/data/docker"
+                note left : 全てのDockerコンテナのデータボリュームを、\nここに集約している。
+            }
+        }
+    }
+}
+
+[ユーザー] .down. [HTTPS]
+[ユーザー] .down. [SSH (GitLab用)]
+[管理者] .down. [SSH (管理用)]
+
+[HTTPS] .down. [nginx-proxy]
+[SSH (GitLab用)] .down. [gitlab-ce]
+[SSH (管理用)] .down. [sshd]
+
+[sshd] .. [letsencrypt] : docker run
+[nginx-proxy] .left. [letsencrypt] : 証明書作成・更新
+
+[nginx-proxy] .down. [gitlab-ce] : gitlab.u6k.me
+[gitlab-runner] .up. [gitlab-ce] : git clone
+[gitlab-runner] .. [registry] : docker push
+[nginx-proxy] .down. [docker-registry-frontend] : registry-web.u6k.me
+[docker-registry-frontend] .. [registry]
+
+[nginx-proxy] .down. [jenkins-dood] : jenkins.u6k.me
+
+[nginx-proxy] .down. [owncloud] : owncloud.u6k.me
+[owncloud] .. [mysql (owncloud)]
+
+[nginx-proxy] .down. [redmine] : redmine.u6k.me
+[redmine] .. [mysql (redmine)]
+
+[nginx-proxy] .down. [zabbix-3.0] : zabbix-u6k.me
+[zabbix-3.0] .. [zabbix-db-mariadb]
+[zabbix-3.0] .. [zabbix-agent-xxl-limited]
+
+@enduml
