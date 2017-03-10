@@ -1,0 +1,52 @@
+@startuml
+
+title: 自宅サービス構造図
+
+actor "ユーザー"
+
+interface "HTTP(S)"
+interface "SSH"
+interface "DNS"
+interface "VNC"
+
+node "MacBookPro" {
+    component "macOS" {
+        [sshd]
+        [VNC Server]
+
+        [nginx-proxy] <<Docker>>
+        [Redmine] <<Docker>>
+        [Jenkins] <<Docker>>
+        [ownCloud] <<Docker>>
+        [minio] <<Docker>>
+        [dnsmasq] <<Docker>>
+    }
+}
+
+[Site24x7]
+[ムームードメイン]
+[MyDNS]
+[AmazonCloudDrive]
+
+[ユーザー] .. [HTTP(S)]
+[ユーザー] .. [SSH]
+[ユーザー] .. [DNS]
+[ユーザー] .. [VNC]
+
+[Site24x7] .. [HTTP(S)]
+[ムームードメイン] .. [MyDNS]
+[MyDNS] .. [HTTP(S)]
+
+[HTTP(S)] .. [nginx-proxy]
+[SSH] .. [sshd]
+[DNS] .. [dnsmasq]
+[VNC] .. [VNC Server]
+
+[nginx-proxy] .. [Redmine] : redmine.u6k.me
+[nginx-proxy] .. [Jenkins] : jenkins.u6k.me
+[nginx-proxy] .. [ownCloud] : owncloud.u6k.me
+[nginx-proxy] .. [minio] : s3.u6k.me
+
+[minio] .. [AmazonCloudDrive]
+
+@enduml
