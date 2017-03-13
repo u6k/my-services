@@ -1,31 +1,55 @@
-# coreos
+# my-services
 
-自宅サーバーのCoreOSを構築します。
+自宅サービスの構成を設計し、構築します。
 
-## Installation
+## セットアップ
 
-最初にCoreOSを構築するときは、`wget`で`cloud-config.yml`をダウンロードして、`coreos-install`を行います。
+macOSをDockerホストとして運用します。アクセスは、VNCおよびsshでアクセスします。
 
-```
-$ wget https://raw.githubusercontent.com/u6k/coreos/master/cloud-config.yml
-$ sudo coreos-install -d /dev/sda -C stable -c ./cloud-config.yml
-```
+### VNCをセットアップ
 
-2回目以降は、`coreos-cloudinit`を行います。
+macOSの共有機能で、VNCをセットアップします。
 
-```
-$ sudo coreos-cloudinit -from-file=./cloud-config.yml
-$ sudo cp cloud-config.yml /var/lib/coreos-install/user_data
-```
+### sshをセットアップ
 
-## Link
+macOSの共有機能で、sshをセットアップします。
 
-* [【CoreOS】cloud-config解説〜インストール - Qiita](http://qiita.com/xshsaku/items/1ba3f930ff80bef685a6)
+### Docker for macOSをセットアップ
+
+Docker for macOSをセットアップします。
+
+### コンテナをセットアップ
+
+以下のコンテナをセットアップします。launchdやsystemdではなく、`$HOME/Documents`に起動スクリプトを作成し、それで起動します。
+
+* u6k/nginx-proxy https://github.com/u6k/nginx-proxy
+* u6k/redmine https://github.com/u6k/redmine
+* u6k/owncloud https://github.com/u6k/owncloud
+* u6k/jenkins https://github.com/u6k/jenkins
+* minio/minio: Minio is an open source object storage server compatible with Amazon S3 APIs https://github.com/minio/minio
+* jpillora/docker-dnsmasq: dnsmasq in a docker container, configurable via a simple web UI https://github.com/jpillora/docker-dnsmasq
+
+## ファイル構造
+
+主なファイル、フォルダ構造は以下の通り。
+
+* `$HOME/Documents`
+    * Dockerコンテナ起動スクリプト
+* `/Volumes/STORAGExxx/docker-volumes/`
+    * Dockerデータ・ボリューム
+
+## ハードウェア構造
+
+* [ハードウェア構成図](doc/hardware.pu)
+
+## サービス構造
+
+* [自宅サービス構成図](doc/my-services.pu)
 
 ## Author
 
 * [os-setup - u6k.Redmine()](https://redmine.u6k.me/projects/os-setup)
-* [u6k/coreos](https://github.com/u6k/coreos)
+* [my-services](https://github.com/u6k/my-services)
 * [u6k.Blog()](http://blog.u6k.me/)
 
 ## License

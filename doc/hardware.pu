@@ -1,0 +1,29 @@
+@startuml
+
+title: ハードウェア構成図
+
+node "ルーター"
+
+node "MacBookPro" {
+    component "macOS"
+}
+
+node "HDD1"
+node "HDD2"
+node "HDD3"
+
+interface "HTTP(S)"
+interface "SSH"
+interface "VNC"
+
+[HTTP(S)] .. [ルーター]
+[SSH] .. [ルーター]
+[VNC] .. [ルーター]
+
+[ルーター] .. [macOS]
+
+[macOS] .. [HDD1]
+[macOS] .. [HDD2]
+[macOS] .. [HDD3]
+
+@enduml
