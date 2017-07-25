@@ -1,0 +1,51 @@
+@startuml
+
+title: Dockerサービス起動依存関係
+
+component "fluentd"
+component "nginx-proxy"
+component "cert"
+component "dnsmasq"
+component "blog"
+component "redmine-db"
+component "redmine"
+component "minio"
+component "owncloud-db"
+component "owncloud"
+component "bookmark"
+component "ceron-analyze"
+component "narou-analyze-db"
+component "narou-analyze"
+component "jenkins"
+
+[nginx-proxy] --> [fluentd]
+[cert] --> [fluentd]
+[cert] --> [nginx-proxy]
+[dnsmasq] --> [fluentd]
+[dnsmasq] --> [nginx-proxy]
+[blog] --> [fluentd]
+[blog] --> [nginx-proxy]
+[redmine-db] --> [fluentd]
+[redmine] --> [fluentd]
+[redmine] --> [nginx-proxy]
+[redmine] --> [redmine-db]
+[minio] --> [fluentd]
+[minio] --> [nginx-proxy]
+[owncloud-db] --> [fluentd]
+[owncloud] --> [fluentd]
+[owncloud] --> [nginx-proxy]
+[owncloud] --> [owncloud-db]
+[bookmark] --> [fluentd]
+[bookmark] --> [nginx-proxy]
+[ceron-analyze] --> [fluentd]
+[ceron-analyze] --> [minio]
+[narou-analyze-db] --> [fluentd]
+[narou-analyze] --> [fluentd]
+[narou-analyze] --> [narou-analyze-db]
+[jenkins] --> [fluentd]
+[jenkins] --> [nginx-proxy]
+[jenkins] --> [minio]
+[jenkins] --> [ceron-analyze]
+[jenkins] --> [narou-analyze]
+
+@enduml
