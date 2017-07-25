@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+    nginx-proxy:
+        image: u6kapps/nginx-proxy
+        privileged: true
+        ports:
+            - "60080:80"
+            - "60443:443"
+        volumes:
+            - "${DOCKER_VOLUMES}/nginx-proxy/certs:/etc/certs:ro"
+            - "${DOCKER_VOLUMES}/nginx-proxy/htpasswd:/etc/nginx/htpasswd:ro"
+            - "/etc/nginx/vhost.d"
+            - "/usr/share/nginx/html"
+            - "/var/run/docker.sock:/tmp/docker.sock:ro"
+        restart: always
