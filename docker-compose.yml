@@ -186,10 +186,10 @@ services:
     narou-analyze:
         image: u6kapps/narou-crawler
         environment:
-            - "NAROU_ANALYZE_DB_HOST=narou-analyze-db"
-            - "NAROU_ANALYZE_DB_USER=${DOCKER_NAROU_ANALYZE_DB_USER}"
-            - "NAROU_ANALYZE_DB_PASS=${DOCKER_NAROU_ANALYZE_DB_PASS}"
-            - "NAROU_ANALYZE_DB_NAME=${DOCKER_NAROU_ANALYZE_DB_NAME}"
+            - "NAROU_CRAWLER_DB_HOST=narou-analyze-db"
+            - "NAROU_CRAWLER_DB_USER=${DOCKER_NAROU_ANALYZE_DB_USER}"
+            - "NAROU_CRAWLER_DB_PASS=${DOCKER_NAROU_ANALYZE_DB_PASS}"
+            - "NAROU_CRAWLER_DB_NAME=${DOCKER_NAROU_ANALYZE_DB_NAME}"
         links:
             - narou-analyze-db
         depends_on:
