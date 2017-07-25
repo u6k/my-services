@@ -1,16 +1,90 @@
-version: '3'
+version: '2'
 
 services:
+    fluentd:
+        image: fluent/fluentd
+        ports:
+            - "24224:24224"
+        volumes:
+            - "${DOCKER_VOLUMES}/fluentd/data:/fluentd/log"
+        restart: always
     nginx-proxy:
         image: u6kapps/nginx-proxy
         privileged: true
         ports:
-            - "60080:80"
-            - "60443:443"
+            - "80:80"
+            - "443:443"
         volumes:
             - "${DOCKER_VOLUMES}/nginx-proxy/certs:/etc/certs:ro"
             - "${DOCKER_VOLUMES}/nginx-proxy/htpasswd:/etc/nginx/htpasswd:ro"
             - "/etc/nginx/vhost.d"
             - "/usr/share/nginx/html"
             - "/var/run/docker.sock:/tmp/docker.sock:ro"
+        depends_on:
+            - fluentd
+        logging:
+            driver: fluentd
+        restart: always
+    cert:
+        image: jrcs/letsencrypt-nginx-proxy-companion
+        privileged: true
+        volumes:
+            - "${DOCKER_VOLUMES}/nginx-proxy/certs:/etc/nginx/certs:rw"
+            - "/var/run/docker.sock:/var/run/docker.sock:ro"
+        volumes_from:
+            - nginx-proxy
+        depends_on:
+            - fluentd
+            - nginx-proxy
+        logging:
+            driver: fluentd
+        restart: always
+    blog:
+        image: u6kapps/blog
+        environment:
+            - "VIRTUAL_HOST=blog.u6k.me"
+            - "VIRTUAL_PORT=80"
+            - "LETSENCRYPT_HOST=blog.u6k.me"
+            - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+        depends_on:
+            - fluentd
+            - nginx-proxy
+        logging:
+            driver: fluentd
+        restart: always
+    redmine:
+        image: u6kapps/redmine
+        volumes:
+            - "${DOCKER_VOLUMES}/redmine/attachment-file:/usr/src/redmine/files"
+            - "/etc/localtime:/etc/localtime:ro"
+        environment:
+            - "REDMINE_DB_POSTGRES=redmine-db"
+            - "REDMINE_DB_USERNAME=${DOCKER_REDMINE_DB_USERNAME}"
+            - "REDMINE_DB_PASSWORD=${DOCKER_REDMINE_DB_PASSWORD}"
+            - "REDMINE_DB_DATABASE=${DOCKER_REDMINE_DB_DATABASE}"
+            - "VIRTUAL_HOST=redmine.u6k.me"
+            - "VIRTUAL_PORT=3000"
+            - "LETSENCRYPT_HOST=redmine.u6k.me"
+            - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+        depends_on:
+            - fluentd
+            - nginx-proxy
+            - redmine-db
+        links:
+            - "redmine-db"
+        logging:
+            driver: fluentd
+        restart: always
+    redmine-db:
+        image: postgres
+        volumes:
+            - "${DOCKER_VOLUMES}/redmine/db:/var/lib/postgresql/data"
+        environment:
+            - "POSTGRES_USER=${DOCKER_REDMINE_DB_USERNAME}"
+            - "POSTGRES_PASSWORD=${DOCKER_REDMINE_DB_PASSWORD}"
+            - "POSTGRES_DB=${DOCKER_REDMINE_DB_DATABASE}"
+        depends_on:
+            - fluentd
+        logging:
+            driver: fluentd
         restart: always
