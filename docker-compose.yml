@@ -1,13 +1,6 @@
 version: '2'
 
 services:
-    fluentd:
-        image: fluent/fluentd
-        ports:
-            - "24224:24224"
-        volumes:
-            - "${DOCKER_VOLUMES}/fluentd/data:/fluentd/log"
-        restart: always
     nginx-proxy:
         image: u6kapps/nginx-proxy
         privileged: true
@@ -20,10 +13,6 @@ services:
             - "/etc/nginx/vhost.d"
             - "/usr/share/nginx/html"
             - "/var/run/docker.sock:/tmp/docker.sock:ro"
-        depends_on:
-            - fluentd
-        logging:
-            driver: fluentd
         restart: always
     cert:
         image: jrcs/letsencrypt-nginx-proxy-companion
@@ -34,10 +23,7 @@ services:
         volumes_from:
             - nginx-proxy
         depends_on:
-            - fluentd
             - nginx-proxy
-        logging:
-            driver: fluentd
         restart: always
     dnsmasq:
         image: jpillora/dnsmasq
@@ -53,10 +39,7 @@ services:
             - "LETSENCRYPT_HOST=dns.u6k.me"
             - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
         depends_on:
-            - fluentd
             - nginx-proxy
-        logging:
-            driver: fluentd
         restart: always
     blog:
         image: u6kapps/blog
@@ -66,10 +49,7 @@ services:
             - "LETSENCRYPT_HOST=blog.u6k.me"
             - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
         depends_on:
-            - fluentd
             - nginx-proxy
-        logging:
-            driver: fluentd
         restart: always
     redmine:
         image: u6kapps/redmine
@@ -88,11 +68,8 @@ services:
         links:
             - "redmine-db"
         depends_on:
-            - fluentd
             - nginx-proxy
             - redmine-db
-        logging:
-            driver: fluentd
         restart: always
     redmine-db:
         image: postgres
@@ -102,10 +79,6 @@ services:
             - "POSTGRES_USER=${DOCKER_REDMINE_DB_USERNAME}"
             - "POSTGRES_PASSWORD=${DOCKER_REDMINE_DB_PASSWORD}"
             - "POSTGRES_DB=${DOCKER_REDMINE_DB_DATABASE}"
-        depends_on:
-            - fluentd
-        logging:
-            driver: fluentd
         restart: always
     minio:
         image: minio/minio
@@ -119,10 +92,7 @@ services:
             - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
         command: server /export
         depends_on:
-            - fluentd
             - nginx-proxy
-        logging:
-            driver: fluentd
         restart: always
     owncloud:
         image: owncloud
@@ -136,11 +106,8 @@ services:
         links:
             - "owncloud-db"
         depends_on:
-            - fluentd
             - nginx-proxy
             - owncloud-db
-        logging:
-            driver: fluentd
         restart: always
     owncloud-db:
         image: postgres
@@ -148,10 +115,6 @@ services:
             - "POSTGRES_USER=${DOCKER_OWNCLOUD_DB_USER}"
             - "POSTGRES_PASSWORD=${DOCKER_OWNCLOUD_DB_PASS}"
             - "POSTGRES_DB=${DOCKER_OWNCLOUD_DB_NAME}"
-        depends_on:
-            - fluentd
-        logging:
-            driver: fluentd
         restart: always
     bookmark:
         image: u6kapps/bookmark-bundler
@@ -163,10 +126,7 @@ services:
             - "LETSENCRYPT_HOST=bookmark.u6k.me"
             - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
         depends_on:
-            - fluentd
             - nginx-proxy
-        logging:
-            driver: fluentd
         restart: always
     ceron-analyze:
         image: u6kapps/ceron-analyze
@@ -178,10 +138,7 @@ services:
         links:
             - "minio:s3"
         depends_on:
-            - fluentd
             - minio
-        logging:
-            driver: fluentd
         restart: always
     narou-analyze:
         image: u6kapps/narou-crawler
@@ -193,10 +150,7 @@ services:
         links:
             - narou-analyze-db
         depends_on:
-            - fluentd
             - narou-analyze-db
-        logging:
-            driver: fluentd
         restart: always
     narou-analyze-db:
         image: postgres
@@ -204,10 +158,6 @@ services:
             - "POSTGRES_USER=${DOCKER_NAROU_ANALYZE_DB_USER}"
             - "POSTGRES_PASSWORD=${DOCKER_NAROU_ANALYZE_DB_PASS}"
             - "POSTGRES_DB=${DOCKER_NAROU_ANALYZE_DB_NAME}"
-        depends_on:
-            - fluentd
-        logging:
-            driver: fluentd
         restart: always
     jenkins:
         image: u6kapps/jenkins
@@ -224,11 +174,8 @@ services:
             - "narou-analyze"
             - "ceron-analyze"
         depends_on:
-            - fluentd
             - nginx-proxy
             - minio
             - ceron-analyze
             - narou-analyze
-        logging:
-            driver: fluentd
         restart: always
