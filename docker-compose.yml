@@ -84,11 +84,11 @@ services:
             - "${DOCKER_VOLUMES}/minio/export:/export"
             - "${DOCKER_VOLUMES}/minio/config:/root/.minio"
         environment:
-            - "VIRTUAL_HOST=s3.u6k.me"
             - "MINIO_ACCESS_KEY=${DOCKER_MINIO_ACCESS_KEY}"
             - "MINIO_SECRET_KEY=${DOCKER_MINIO_SECRET_KEY}"
+            - "VIRTUAL_HOST=minio.u6k.me"
             - "VIRTUAL_PORT=9000"
-            - "LETSENCRYPT_HOST=s3.u6k.me"
+            - "LETSENCRYPT_HOST=minio.u6k.me"
             - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
         command: server /export
         depends_on:
