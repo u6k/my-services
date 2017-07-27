@@ -34,12 +34,6 @@ services:
         environment:
             - "USER=${DOCKER_DNSMASQ_USER}"
             - "PASS=${DOCKER_DNSMASQ_PASS}"
-            - "VIRTUAL_HOST=dns.u6k.me"
-            - "VIRTUAL_PORT=8080"
-            - "LETSENCRYPT_HOST=dns.u6k.me"
-            - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
-        depends_on:
-            - nginx-proxy
         restart: always
     blog:
         image: u6kapps/blog
