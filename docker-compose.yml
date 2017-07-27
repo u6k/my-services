@@ -15,7 +15,7 @@ services:
             - "80:80"
             - "443:443"
         volumes:
-            - "${DOCKER_VOLUMES}/nginx-proxy/certs:/etc/certs:ro"
+            - "${DOCKER_VOLUMES}/nginx-proxy/certs:/etc/nginx/certs:ro"
             - "${DOCKER_VOLUMES}/nginx-proxy/htpasswd:/etc/nginx/htpasswd:ro"
             - "/etc/nginx/vhost.d"
             - "/usr/share/nginx/html"
