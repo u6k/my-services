@@ -166,6 +166,4 @@ services:
         depends_on:
             - nginx-proxy
             - minio
-            - ceron-analyze
-            - narou-analyze
         restart: always
