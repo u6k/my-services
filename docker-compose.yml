@@ -134,6 +134,8 @@ services:
         restart: always
     narou-analyze-db:
         image: postgres
+        volumes:
+            - "${DOCKER_VOLUMES}/narou-analyze/db:/var/lib/postgresql/data"
         environment:
             - "POSTGRES_USER=${DOCKER_NAROU_ANALYZE_DB_USER}"
             - "POSTGRES_PASSWORD=${DOCKER_NAROU_ANALYZE_DB_PASS}"
