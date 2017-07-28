@@ -99,14 +99,6 @@ services:
             - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
         depends_on:
             - nginx-proxy
-            - owncloud-db
-        restart: always
-    owncloud-db:
-        image: postgres
-        environment:
-            - "POSTGRES_USER=${DOCKER_OWNCLOUD_DB_USER}"
-            - "POSTGRES_PASSWORD=${DOCKER_OWNCLOUD_DB_PASS}"
-            - "POSTGRES_DB=${DOCKER_OWNCLOUD_DB_NAME}"
         restart: always
     bookmark:
         image: u6kapps/bookmark-bundler
