@@ -1,0 +1,34 @@
+#!groovy
+
+timestamps {
+    try {
+        node("digitalocean") {
+            cleanWs()
+            stage("dump") {
+                sh("docker exec core_redmine-db_1 pg_dump -U ${REDMINE_DB_USER} ${REDMINE_DB_NAME} >redmine.${env.BUILD_TIMESTAMP}.psql.dmp")
+                sh("docker cp core_redmine_1:/usr/src/redmine/files/ attachment-file/")
+            }
+            stage("stash") {
+                stash name: "backup-redmine"
+            }
+        }
+        node("master") {
+            cleanWs()
+            stage("unstash") {
+                unstash "backup-redmine"
+            }
+            stage("archive") {
+                sh("7z a -t7z -mx=9 redmine.${env.BUILD_TIMESTAMP}.psql.dmp.7z redmine.${env.BUILD_TIMESTAMP}.psql.dmp")
+                sh("rm redmine.${env.BUILD_TIMESTAMP}.psql.dmp")
+            }
+            stage("upload") {
+                withCredentials([usernamePassword(credentialsId: "spaces@digitalocean", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
+                    sh("aws --endpoint-url https://nyc3.digitaloceanspaces.com --region nyc3 s3 sync . s3://u6k/backup.redmine/")
+                }
+            }
+        }
+    } catch(Exception e) {
+        slackSend(color: "danger", message: "Fail: ${env.JOB_NAME} #${env.BUILD_NUMBER} ${e}")
+        throw e
+    }
+}
