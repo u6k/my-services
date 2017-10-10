@@ -1,0 +1,20 @@
+#!groovy
+
+timestamps {
+    try {
+        node("master") {
+            cleanWs()
+            stage("search") {
+                sh("curl -v -o 'narou-search-result-${env.BUILD_TIMESTAMP}.json' 'http://api.syosetu.com/novelapi/api/?gzip=t&out=json&lim=500&order=hyoka'")
+            }
+            stage("upload") {
+                withCredentials([usernamePassword(credentialsId: "minio", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
+                    sh("aws --endpoint-url http://minio:9000 --region us-east-1 s3 sync . s3://narou.search")
+                }
+            }
+        }
+    } catch(Exception e) {
+        slackSend(color: "danger", message: "Fail: ${env.JOB_NAME} #${env.BUILD_NUMBER} ${e}")
+        throw e
+    }
+}
