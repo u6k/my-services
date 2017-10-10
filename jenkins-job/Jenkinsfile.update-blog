@@ -1,0 +1,21 @@
+#!groovy
+
+timestamps {
+    try {
+        node("digitalocean") {
+            cleanWs()
+            stage("checkout") {
+                checkout scm
+            }
+            stage("restart") {
+                sh("docker-compose -f docker-compose/docker-compose.blog.yml pull")
+                sh("docker-compose -f docker-compose/docker-compose.blog.yml down")
+                sh("docker-compose -f docker-compose/docker-compose.blog.yml up -d")
+            }
+        }
+        slackSend(color: "good", message: "Success: ${env.JOB_NAME} #${env.BUILD_NUMBER}")
+    } catch(Exception e) {
+        slackSend(color: "danger", message: "Fail: ${env.JOB_NAME} #${env.BUILD_NUMBER} ${e}")
+        throw e
+    }
+}
