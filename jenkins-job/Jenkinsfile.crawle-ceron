@@ -1,0 +1,14 @@
+#!groovy
+
+timestamps {
+    try {
+        node("master") {
+            stage("crawle") {
+                sh("curl -v -X POST http://ceron-analyze:8080/api/categories/download")
+            }
+        }
+    } catch(Exception e) {
+        slackSend(color: "danger", message: "Fail: ${env.JOB_NAME} #${env.BUILD_NUMBER} ${e}")
+        throw e
+    }
+}
