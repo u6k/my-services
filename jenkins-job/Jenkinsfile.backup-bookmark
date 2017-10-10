@@ -1,0 +1,22 @@
+#!groovy
+
+timestamps {
+    try {
+        node("master") {
+            cleanWs()
+            stage("dump") {
+                sh("docker cp documents_bookmark_1:/var/lib/bookmark/hsqldb .")
+                sh("7z a -t7z -mx=9 bookmark.${env.BUILD_TIMESTAMP}.hsqldb.dmp.7z hsqldb/")
+                sh("rm -r hsqldb/")
+            }
+            stage("upload") {
+                withCredentials([usernamePassword(credentialsId: "spaces_digitalocean.com", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
+                    sh("aws --endpoint-url https://nyc3.digitaloceanspaces.com --region nyc3 s3 sync . s3://u6k/backup.bookmark/")
+                }
+            }
+        }
+    } catch(Exception e) {
+        slackSend(color: "danger", message: "Fail: ${env.JOB_NAME} #${env.BUILD_NUMBER} ${e}")
+        throw e
+    }
+}
