@@ -1,0 +1,26 @@
+#!groovy
+
+timestamps {
+    try {
+        node("master") {
+            stage("crawle") {
+                def date = new Date()
+                for (def i = 0; i < 20; i++) {
+                    def dateStr = date.format("yyyy-MM-dd")
+                    sh("curl -v -o 'ncodes-${dateStr}.json' -H 'Content-Type: application/json' 'http://narou-analyze:8080/api/ncodes/${dateStr}'")
+
+                    def ncodes = readJSON(file: "ncodes-${dateStr}.json")
+                    for (def ncode : ncodes) {
+                        sh("curl -v -X POST 'http://narou-analyze:8080/api/novels/${ncode}/meta/download'")
+                        sh("curl -v -X POST 'http://narou-analyze:8080/api/novels/${ncode}/meta'")
+                    }
+
+                    date -= 1
+                }
+            }
+        }
+    } catch(Exception e) {
+        slackSend(color: "danger", message: "Fail: ${env.JOB_NAME} #${env.BUILD_NUMBER} ${e}")
+        throw e
+    }
+}
