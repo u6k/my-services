@@ -1,0 +1,20 @@
+#!groovy
+
+timestamps {
+    try {
+        node("master") {
+            stage("crawle") {
+                def date = new Date()
+                for (def i = 0; i < 20; i++) {
+                    def curlStr = "curl -v -X POST -H 'Content-Type: application/json' -d '{\"searchDate\":\"${date.format('yyyy-MM-dd')}\"}' http://narou-analyze:8080/api/novels/"
+                    sh(curlStr)
+
+                    date -= 1
+                }
+            }
+        }
+    } catch(Exception e) {
+        slackSend(color: "danger", message: "Fail: ${env.JOB_NAME} #${env.BUILD_NUMBER} ${e}")
+        throw e
+    }
+}
