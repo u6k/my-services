@@ -1,0 +1,22 @@
+#!groovy
+
+timestamps {
+    try {
+        node("master") {
+            cleanWs()
+            stage("dump") {
+                sh("docker exec documents_narou-analyze-db_1 pg_dump -U ${NAROU_ANALYZE_DB_USER} ${NAROU_ANALYZE_DB_NAME} >narou-analyze.${env.BUILD_TIMESTAMP}.psql.dmp")
+                sh("7z a -t7z -mx=9 narou-analyze.${env.BUILD_TIMESTAMP}.psql.dmp.7z narou-analyze.${env.BUILD_TIMESTAMP}.psql.dmp")
+                sh("rm narou-analyze.${env.BUILD_TIMESTAMP}.psql.dmp")
+            }
+            stage("upload") {
+                withCredentials([usernamePassword(credentialsId: "spaces_digitalocean.com", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
+                    sh("aws --endpoint-url https://nyc3.digitaloceanspaces.com --region nyc3 s3 sync . s3://u6k/backup.narou-analyze/")
+                }
+            }
+        }
+    } catch(Exception e) {
+        slackSend(color: "danger", message: "Fail: ${env.JOB_NAME} #${env.BUILD_NUMBER} ${e}")
+        throw e
+    }
+}
