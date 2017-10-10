@@ -22,7 +22,7 @@ timestamps {
                 sh("rm redmine.${env.BUILD_TIMESTAMP}.psql.dmp")
             }
             stage("upload") {
-                withCredentials([usernamePassword(credentialsId: "spaces_digitalocean", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
+                withCredentials([usernamePassword(credentialsId: "spaces_digitalocean.com", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
                     sh("aws --endpoint-url https://nyc3.digitaloceanspaces.com --region nyc3 s3 sync . s3://u6k/backup.redmine/")
                 }
             }
