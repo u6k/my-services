@@ -4,8 +4,10 @@ timestamps {
     try {
         node("master") {
             stage("crawle") {
-                sh("docker exec ${env.APP_CONTAINER_NAME} rails crawl:stocks")
-                sh("docker exec ${env.APP_CONTAINER_NAME} rails crawl:stock_prices[${ARG_TICKER_SYMBOL},${ARG_YEAR}]")
+                sh("docker exec ${env.APP_CONTAINER_NAME} rails crawl:download_stocks[${ARG_MISSING_ONLY}]")
+                sh("docker exec ${env.APP_CONTAINER_NAME} rails crawl:import_stocks")
+                sh("docker exec ${env.APP_CONTAINER_NAME} rails crawl:download_stock_prices[${ARG_TICKER_SYMBOL},${ARG_YEAR},${ARG_MISSING_ONLY}]")
+                sh("docker exec ${env.APP_CONTAINER_NAME} rails crawl:import_stock_prices[${ARG_TICKER_SYMBOL},${ARG_YEAR}]")
             }
         }
     } catch(Exception e) {
