@@ -1,0 +1,6 @@
+- hosts: vagrants
+  sudo: true
+  user: vagrant
+  tasks:
+    - name: echo
+      shell: echo test
