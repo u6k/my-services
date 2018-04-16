@@ -2,6 +2,10 @@
   sudo: true
   user: vagrant
   tasks:
+    # Setting Timezone
+    - name: Setting Timezone
+      timezone:
+        name: Asia/Tokyo
     # Install Docker CE
     - name: Install Docker (1/5)
       apt: name={{item}} update_cache=yes
