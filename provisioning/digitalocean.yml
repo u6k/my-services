@@ -6,6 +6,28 @@
     - name: Setting Timezone
       timezone:
         name: Asia/Tokyo
+    # Setting NTP
+    - name: Install NTP
+      apt: name=ntp update_cache=yes
+    - name: Setting NTP (1/2)
+      replace:
+        dest: /etc/ntp.conf
+        regexp: '^pool'
+        replace: '# pool'
+        backup: true
+    - name: Setting NTP (2/2)
+      lineinfile:
+        dest: /etc/ntp.conf
+        insertafter: '^# pool'
+        line: '{{item}}'
+      with_items:
+        - 'server ntp2.ring.gr.jp'
+        - 'server ntp1.ring.gr.jp'
+        - 'server ntp0.ring.gr.jp'
+    - name: Restart NTPd
+      service:
+        name: ntp
+        state: restarted
     # Install Docker CE
     - name: Install Docker (1/5)
       apt: name={{item}} update_cache=yes
