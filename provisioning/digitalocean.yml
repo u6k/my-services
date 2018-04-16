@@ -2,5 +2,20 @@
   sudo: true
   user: vagrant
   tasks:
-    - name: echo
-      shell: echo test
+    # Install Docker CE
+    - name: Install Docker (1/5)
+      apt: name={{item}} update_cache=yes
+      with_items:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - gnupg2
+        - software-properties-common
+    - name: Install Docker (2/5)
+      shell: curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+    - name: Install Docker (3/5)
+      shell: apt-key fingerprint 0EBFCD88
+    - name: Install Docker (4/5)
+      shell: add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
+    - name: Install Docker (5/5)
+      apt: name=docker-ce update_cache=yes
