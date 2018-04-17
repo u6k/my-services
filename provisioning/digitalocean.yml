@@ -129,3 +129,8 @@
         - 80
         - 443
         - '{{sshd_port}}'
+    # Setting vim
+    - name: copy vimrc
+      template:
+        src: 'vimrc'
+        dest: '/home/{{sshd_user}}/.vimrc'
