@@ -1,5 +1,5 @@
 - hosts: vagrants
-  sudo: true
+  become: yes
   user: vagrant
   vars_files:
     - settings.yml
