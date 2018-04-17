@@ -90,7 +90,7 @@
         name: ntp
         state: restarted
     # Install Docker CE
-    - name: Install Docker (1/5)
+    - name: PreInstall Docker (1/4)
       apt: name={{item}} update_cache=yes
       with_items:
         - apt-transport-https
@@ -98,16 +98,34 @@
         - curl
         - gnupg2
         - software-properties-common
-    - name: Install Docker (2/5)
+    - name: PreInstall Docker (2/4)
       shell: curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
-    - name: Install Docker (3/5)
+    - name: PreInstall Docker (3/4)
       shell: apt-key fingerprint 0EBFCD88
-    - name: Install Docker (4/5)
+    - name: PreInstall Docker (4/4)
       shell: add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
-    - name: Install Docker (5/5)
-      apt: name=docker-ce update_cache=yes
+    # Install Softwares
+    - name: Install Softwares
+      apt: name={{item}} update_cache=yes
+      with_items:
+        - docker-ce
+        - git
+        - git-flow
+        - tmux
+        - ufw
     # Install docker-compose
     - name: Install docker-compose (1/2)
       shell: curl -L https://github.com/docker/compose/releases/download/1.21.0/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
     - name: Install docker-compose (2/2)
       shell: chmod +x /usr/local/bin/docker-compose
+    # Setting Firewall
+    - name: Setting ufw
+      ufw:
+        state: enabled
+        policy: deny
+        rule: allow
+        port: '{{item}}'
+      with_items:
+        - 80
+        - 443
+        - '{{sshd_port}}'
