@@ -19,6 +19,7 @@
       user:
         name: '{{sshd_user}}'
         groups: wheel
+        shell: /bin/bash
     - name: mkdir .ssh
       file:
         dest: '/home/{{sshd_user}}/.ssh/'
