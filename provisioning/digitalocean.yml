@@ -4,10 +4,21 @@
   vars_files:
     - settings.yml
   tasks:
+    # Setting sudo
+    - name: Add Wheel group
+      group:
+        name: wheel
+    - name: Allow wheel group to have passwordless sudo
+      lineinfile:
+        dest: /etc/sudoers
+        regexp: '^%wheel'
+        line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+        validate: 'visudo -cf %s'
     # Setting User
     - name: Add User
       user:
         name: '{{sshd_user}}'
+        groups: wheel
     - name: mkdir .ssh
       file:
         dest: '/home/{{sshd_user}}/.ssh/'
@@ -27,90 +38,26 @@
         src: 'id_rsa.pub'
         dest: '/home/{{sshd_user}}/.ssh/authorized_keys'
     # Setting SSH
-    - name: Setting SSH (1/x)
+    - name: Setting SSH
       lineinfile:
         dest: /etc/ssh/sshd_config
-        regexp: '^RhostsRSAAuthentication'
-        insertafter: '^#RhostsRSAAuthentication'
-        line: 'RhostsRSAAuthentication no'
+        regexp: '{{item.regexp}}'
+        insertafter: '{{item.insertafter}}'
+        line: '{{item.line}}'
         backup: true
-    - name: Setting SSH (1/x)
-      lineinfile:
-        dest: /etc/ssh/sshd_config
-        regexp: '^HostbasedAuthentication'
-        insertafter: '^#HostbasedAuthentication'
-        line: 'HostbasedAuthentication no'
-        backup: true
-    - name: Setting SSH (1/x)
-      lineinfile:
-        dest: /etc/ssh/sshd_config
-        regexp: '^IgnoreRhosts'
-        insertafter: '^#IgnoreRhosts'
-        line: 'IgnoreRhosts yes'
-        backup: true
-    - name: Setting SSH (1/x)
-      lineinfile:
-        dest: /etc/ssh/sshd_config
-        regexp: '^PubkeyAuthentication'
-        insertafter: '^#PubkeyAuthentication'
-        line: 'PubkeyAuthentication yes'
-        backup: true
-    - name: Setting SSH (1/x)
-      lineinfile:
-        dest: /etc/ssh/sshd_config
-        regexp: '^AuthorizedKeysFile'
-        insertafter: '^#AuthorizedKeysFile'
-        line: 'AuthorizedKeysFile .ssh/authorized_keys'
-        backup: true
-    - name: Setting SSH (1/x)
-      lineinfile:
-        dest: /etc/ssh/sshd_config
-        regexp: '^PasswordAuthentication'
-        insertafter: '^#PasswordAuthentication'
-        line: 'PasswordAuthentication no'
-        backup: true
-    - name: Setting SSH (1/x)
-      lineinfile:
-        dest: /etc/ssh/sshd_config
-        regexp: '^PermitEmptyPasswords'
-        insertafter: '^#PermitEmptyPasswords'
-        line: 'PermitEmptyPasswords no'
-        backup: true
-    - name: Setting SSH (2/x)
-      lineinfile:
-        dest: /etc/ssh/sshd_config
-        regexp: '^ChallengeResponseAuthentication'
-        insertafter: '^#ChallengeResponseAuthentication'
-        line: 'ChallengeResponseAuthentication no'
-        backup: true
-    - name: Setting SSH (3/x)
-      lineinfile:
-        dest: /etc/ssh/sshd_config
-        regexp: '^PermitRootLogin'
-        insertafter: '^#PermitRootLogin'
-        line: 'PermitRootLogin no'
-        backup: true
-    - name: Setting SSH (4/x)
-      lineinfile:
-        dest: /etc/ssh/sshd_config
-        regexp: '^Port'
-        insertafter: '^#Port'
-        line: 'Port {{sshd_port}}'
-        backup: true
-    - name: Setting SSH (5/x)
-      lineinfile:
-        dest: /etc/ssh/sshd_config
-        regexp: '^AllowUsers'
-        insertafter: '^#AllowUsers'
-        line: 'AllowUsers {{sshd_user}}'
-        backup: true
-    - name: Setting SSH (6/x)
-      lineinfile:
-        dest: /etc/ssh/sshd_config
-        regexp: '^Protocol'
-        insertafter: '^#Protocol'
-        line: 'Protocol 2'
-        backup: true
+      with_items:
+          - { regexp: '^RhostsRSAAuthentication', insertafter: '^#RhostsRSAAuthentication', line: 'RhostsRSAAuthentication no' }
+          - { regexp: '^HostbasedAuthentication', insertafter: '^#HostbasedAuthentication', line: 'HostbasedAuthentication no' }
+          - { regexp: '^IgnoreRhosts', insertafter: '^#IgnoreRhosts', line: 'IgnoreRhosts yes' }
+          - { regexp: '^PubkeyAuthentication', insertafter: '^#PubkeyAuthentication', line: 'PubkeyAuthentication yes' }
+          - { regexp: '^AuthorizedKeysFile', insertafter: '^#AuthorizedKeysFile', line: 'AuthorizedKeysFile .ssh/authorized_keys' }
+          - { regexp: '^PasswordAuthentication', insertafter: '^#PasswordAuthentication', line: 'PasswordAuthentication no' }
+          - { regexp: '^PermitEmptyPasswords', insertafter: '^#PermitEmptyPasswords', line: 'PermitEmptyPasswords no' }
+          - { regexp: '^ChallengeResponseAuthentication', insertafter: '^#ChallengeResponseAuthentication', line: 'ChallengeResponseAuthentication no' }
+          - { regexp: '^PermitRootLogin', insertafter: '^#PermitRootLogin', line: 'PermitRootLogin no' }
+          - { regexp: '^Port', insertafter: '^#Port', line: 'Port {{sshd_port}}' }
+          - { regexp: '^AllowUsers', insertafter: '^#AllowUsers', line: 'AllowUsers {{sshd_user}}' }
+          - { regexp: '^Protocol', insertafter: '^#Protocol', line: 'Protocol 2' }
     - name: Restart SSHd
       service:
         name: ssh
