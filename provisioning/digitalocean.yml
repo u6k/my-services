@@ -1,7 +1,120 @@
 - hosts: vagrants
   sudo: true
   user: vagrant
+  vars_files:
+    - settings.yml
   tasks:
+    # Setting User
+    - name: Add User
+      user:
+        name: '{{sshd_user}}'
+    - name: mkdir .ssh
+      file:
+        dest: '/home/{{sshd_user}}/.ssh/'
+        state: directory
+        owner: '{{sshd_user}}'
+        group: '{{sshd_user}}'
+        mode: 0700 
+    - name: Create authorized keys
+      file:
+        dest: '/home/{{sshd_user}}/.ssh/authorized_keys'
+        state: touch
+        owner: '{{sshd_user}}'
+        group: '{{sshd_user}}'
+        mode: 0600
+    - name: Copy public key
+      template:
+        src: 'id_rsa.pub'
+        dest: '/home/{{sshd_user}}/.ssh/authorized_keys'
+    # Setting SSH
+    - name: Setting SSH (1/x)
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^RhostsRSAAuthentication'
+        insertafter: '^#RhostsRSAAuthentication'
+        line: 'RhostsRSAAuthentication no'
+        backup: true
+    - name: Setting SSH (1/x)
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^HostbasedAuthentication'
+        insertafter: '^#HostbasedAuthentication'
+        line: 'HostbasedAuthentication no'
+        backup: true
+    - name: Setting SSH (1/x)
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^IgnoreRhosts'
+        insertafter: '^#IgnoreRhosts'
+        line: 'IgnoreRhosts yes'
+        backup: true
+    - name: Setting SSH (1/x)
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^PubkeyAuthentication'
+        insertafter: '^#PubkeyAuthentication'
+        line: 'PubkeyAuthentication yes'
+        backup: true
+    - name: Setting SSH (1/x)
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^AuthorizedKeysFile'
+        insertafter: '^#AuthorizedKeysFile'
+        line: 'AuthorizedKeysFile .ssh/authorized_keys'
+        backup: true
+    - name: Setting SSH (1/x)
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^PasswordAuthentication'
+        insertafter: '^#PasswordAuthentication'
+        line: 'PasswordAuthentication no'
+        backup: true
+    - name: Setting SSH (1/x)
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^PermitEmptyPasswords'
+        insertafter: '^#PermitEmptyPasswords'
+        line: 'PermitEmptyPasswords no'
+        backup: true
+    - name: Setting SSH (2/x)
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^ChallengeResponseAuthentication'
+        insertafter: '^#ChallengeResponseAuthentication'
+        line: 'ChallengeResponseAuthentication no'
+        backup: true
+    - name: Setting SSH (3/x)
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^PermitRootLogin'
+        insertafter: '^#PermitRootLogin'
+        line: 'PermitRootLogin no'
+        backup: true
+    - name: Setting SSH (4/x)
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^Port'
+        insertafter: '^#Port'
+        line: 'Port {{sshd_port}}'
+        backup: true
+    - name: Setting SSH (5/x)
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^AllowUsers'
+        insertafter: '^#AllowUsers'
+        line: 'AllowUsers {{sshd_user}}'
+        backup: true
+    - name: Setting SSH (6/x)
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^Protocol'
+        insertafter: '^#Protocol'
+        line: 'Protocol 2'
+        backup: true
+    - name: Restart SSHd
+      service:
+        name: ssh
+        state: restarted
     # Setting Timezone
     - name: Setting Timezone
       timezone:
@@ -13,13 +126,14 @@
       replace:
         dest: /etc/ntp.conf
         regexp: '^pool'
-        replace: '# pool'
+        replace: '#pool'
         backup: true
     - name: Setting NTP (2/2)
       lineinfile:
         dest: /etc/ntp.conf
-        insertafter: '^# pool'
+        insertafter: '^#pool'
         line: '{{item}}'
+        backup: true
       with_items:
         - 'server ntp2.ring.gr.jp'
         - 'server ntp1.ring.gr.jp'

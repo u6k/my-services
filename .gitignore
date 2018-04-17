@@ -1,1 +1,4 @@
 /.vagrant
+/provisioning/digitalocean.retry
+/provisioning/settings.yml
+/provisioning/id_rsa.pub
