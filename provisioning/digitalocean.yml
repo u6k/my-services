@@ -112,9 +112,12 @@
         - docker-ce
         - git
         - git-flow
+        - tig
         - tmux
         - ufw
         - vim
+        - zip
+        - p7zip-full
     # Install docker-compose
     - name: Install docker-compose (1/2)
       shell: curl -L https://github.com/docker/compose/releases/download/1.21.0/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
