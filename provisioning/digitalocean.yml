@@ -114,6 +114,7 @@
         - git-flow
         - tmux
         - ufw
+        - vim
     # Install docker-compose
     - name: Install docker-compose (1/2)
       shell: curl -L https://github.com/docker/compose/releases/download/1.21.0/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
@@ -131,7 +132,11 @@
         - 443
         - '{{sshd_port}}'
     # Setting vim
-    - name: copy vimrc
+    - name: Copy vimrc
       template:
         src: 'vimrc'
         dest: '/home/{{sshd_user}}/.vimrc'
+    - name: Install NeoBundle
+      shell: curl https://raw.githubusercontent.com/Shougo/neobundle.vim/master/bin/install.sh | sudo -u {{sshd_user}} sh -s
+    - name: Setup NeoBundle
+      shell: sudo -u {{sshd_user}} vim +":NeoBundleInstall" +:q
