@@ -140,3 +140,12 @@
       shell: curl https://raw.githubusercontent.com/Shougo/neobundle.vim/master/bin/install.sh | sudo -u {{sshd_user}} sh -s
     - name: Setup NeoBundle
       shell: sudo -u {{sshd_user}} vim +":NeoBundleInstall" +:q
+    # Setting git
+    - name: Setting git global config
+      shell: '{{item}}'
+      with_items:
+        - sudo -u {{sshd_user}} git config --global user.name "{{git_user_name}}"
+        - sudo -u {{sshd_user}} git config --global user.email "{{git_user_email}}"
+        - sudo -u {{sshd_user}} git config --global core.precomposeunicode true
+        - sudo -u {{sshd_user}} git config --global core.autocrlf false
+        - sudo -u {{sshd_user}} git config --global core.quotepath false
