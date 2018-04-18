@@ -1,0 +1,11 @@
+[user]
+[core]
+  precomposeunicode = true
+  autocrlf = false
+  quotepath = false
+[color]
+  diff = auto
+  status = auto
+  branch = auto
+[push]
+  default = simple

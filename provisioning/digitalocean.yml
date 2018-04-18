@@ -118,6 +118,21 @@
         - vim
         - zip
         - p7zip-full
+    # Setting git
+    - name: Copy git config
+      template:
+        src: 'gitconfig'
+        dest: '/home/{{sshd_user}}/.gitconfig'
+        owner: '{{sshd_user}}'
+        group: '{{sshd_user}}'
+    - name: Setting git config
+      lineinfile:
+        dest: '/home/{{sshd_user}}/.gitconfig'
+        insertafter: '^\[user\]$'
+        line: '{{item}}'
+      with_items:
+        - '  name = {{git_user_name}}'
+        - '  email = {{git_user_email}}'
     # Install docker-compose
     - name: Install docker-compose (1/2)
       shell: curl -L https://github.com/docker/compose/releases/download/1.21.0/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
@@ -143,12 +158,3 @@
       shell: curl https://raw.githubusercontent.com/Shougo/neobundle.vim/master/bin/install.sh | sudo -u {{sshd_user}} sh -s
     - name: Setup NeoBundle
       shell: sudo -u {{sshd_user}} vim +":NeoBundleInstall" +:q
-    # Setting git
-    - name: Setting git global config
-      shell: '{{item}}'
-      with_items:
-        - sudo -u {{sshd_user}} git config --global user.name "{{git_user_name}}"
-        - sudo -u {{sshd_user}} git config --global user.email "{{git_user_email}}"
-        - sudo -u {{sshd_user}} git config --global core.precomposeunicode true
-        - sudo -u {{sshd_user}} git config --global core.autocrlf false
-        - sudo -u {{sshd_user}} git config --global core.quotepath false
