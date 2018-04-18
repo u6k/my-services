@@ -1,2 +1,4 @@
 sshd_port: 10022
 sshd_user: foo
+git_user_name: foo
+git_user_email: foo@example.com
