@@ -1,0 +1,226 @@
+version: '3'
+
+services:
+  nginx-proxy:
+    image: u6kapps/nginx-proxy
+    privileged: true
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "cert:/etc/nginx/certs:ro"
+      - "htpasswd:/etc/nginx/htpasswd:ro"
+      - "/etc/nginx/vhost.d"
+      - "/usr/share/nginx/html"
+      - "/var/run/docker.sock:/tmp/docker.sock:ro"
+    restart: always
+  cert:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    privileged: true
+    volumes:
+      - "cert:/etc/nginx/certs:rw"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    depends_on:
+      - nginx-proxy
+    restart: always
+  blog:
+    image: u6kapps/blog
+    environment:
+      - "VIRTUAL_HOST=blog.u6k.me"
+      - "VIRTUAL_PORT=80"
+      - "LETSENCRYPT_HOST=blog.u6k.me"
+      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+    depends_on:
+      - nginx-proxy
+    restart: always
+  minio:
+    image: minio/minio
+    volumes:
+      - "${DOCKER_VOLUMES}/minio/export:/export"
+      - "${DOCKER_VOLUMES}/minio/config:/root/.minio"
+    environment:
+      - "MINIO_ACCESS_KEY=${DOCKER_MINIO_ACCESS_KEY}"
+      - "MINIO_SECRET_KEY=${DOCKER_MINIO_SECRET_KEY}"
+      - "VIRTUAL_HOST=minio.u6k.me"
+      - "VIRTUAL_PORT=9000"
+      - "LETSENCRYPT_HOST=minio.u6k.me"
+      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+    command: server /export
+    depends_on:
+      - nginx-proxy
+    restart: always
+  bookmark:
+    image: u6kapps/bookmark-bundler
+    volumes:
+      - "bookmark-db:/var/lib/bookmark/hsqldb"
+    environment:
+      - "VIRTUAL_HOST=bookmark.u6k.me"
+      - "VIRTUAL_PORT=8080"
+      - "LETSENCRYPT_HOST=bookmark.u6k.me"
+      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+    depends_on:
+      - nginx-proxy
+    restart: always
+  ceron-analyze:
+    image: u6kapps/ceron-analyze
+    environment:
+      - "S3_URL=http://minio:9000/"
+      - "S3_BUCKET=ceron"
+      - "S3_ACCESS_ID=${DOCKER_MINIO_ACCESS_KEY}"
+      - "S3_SECRET_KEY=${DOCKER_MINIO_SECRET_KEY}"
+      - "VIRTUAL_HOST=ceron-analyze.u6k.me"
+      - "VIRTUAL_PORT=8080"
+      - "LETSENCRYPT_HOST=ceron-analyze.u6k.me"
+      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+    depends_on:
+      - nginx-proxy
+      - minio
+    restart: always
+  extract-content:
+    image: u6kapps/extract-content
+    environment:
+      - "VIRTUAL_HOST=extract-content.u6k.me"
+      - "VIRTUAL_PORT=5000"
+      - "LETSENCRYPT_HOST=extract-content.u6k.me"
+      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+    depends_on:
+      - nginx-proxy
+    restart: always
+  investment-machine-app:
+    image: u6kapps/investment-machine
+    environment:
+      - "RAILS_ENV=production"
+      - "RAILS_LOG_TO_STDOUT=true"
+      - "SECRET_KEY_BASE=${DOCKER_INVESTMENT_SECRET_KEY_BASE}"
+      - "DB_HOST=investment-machine-db"
+      - "DB_USERNAME=${DOCKER_INVESTMENT_DB_USER}"
+      - "DB_PASSWORD=${DOCKER_INVESTMENT_DB_PASS}"
+      - "DB_DATABASE=${DOCKER_INVESTMENT_DB_NAME}"
+      - "S3_ENDPOINT=http://minio:9000"
+      - "S3_REGION=us-east-1"
+      - "S3_ACCESS_KEY=${DOCKER_MINIO_ACCESS_KEY}"
+      - "S3_SECRET_KEY=${DOCKER_MINIO_SECRET_KEY}"
+      - "S3_BUCKET=investment"
+      - "VIRTUAL_HOST=investment-machine.u6k.me"
+      - "VIRTUAL_PORT=3000"
+      - "LETSENCRYPT_HOST=investment-machine.u6k.me"
+      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+    depends_on:
+      - nginx-proxy
+      - investment-machine-db
+    restart: always
+  investment-machine-db:
+    image: postgres:10
+    environment:
+      - "POSTGRES_USER=${DOCKER_INVESTMENT_DB_USER}"
+      - "POSTGRES_PASSWORD=${DOCKER_INVESTMENT_DB_PASS}"
+      - "POSTGRES_DB=${DOCKER_INVESTMENT_DB_NAME}"
+    volumes:
+      - "investment-machine-db:/var/lib/postgresql/data"
+    restart: always
+  jenkins:
+    image: u6kapps/jenkins
+    volumes:
+      - "jenkins:/root/.jenkins"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    environment:
+      - "VIRTUAL_HOST=jenkins.u6k.me"
+      - "VIRTUAL_PORT=8080"
+      - "LETSENCRYPT_HOST=jenkins.u6k.me"
+      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+    depends_on:
+      - minio
+      - nginx-proxy
+    restart: always
+  narou-analyze:
+    image: u6kapps/narou-analyze
+    environment:
+      - "NAROU_CRAWLER_DB_HOST=narou-analyze-db"
+      - "NAROU_CRAWLER_DB_USER=${DOCKER_NAROU_ANALYZE_DB_USER}"
+      - "NAROU_CRAWLER_DB_PASS=${DOCKER_NAROU_ANALYZE_DB_PASS}"
+      - "NAROU_CRAWLER_DB_NAME=${DOCKER_NAROU_ANALYZE_DB_NAME}"
+      - "VIRTUAL_HOST=narou-analyze.u6k.me"
+      - "VIRTUAL_PORT=8080"
+      - "LETSENCRYPT_HOST=narou-analyze.u6k.me"
+      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+    depends_on:
+      - nginx-proxy
+      - narou-analyze-db
+    restart: always
+  narou-analyze-db:
+      image: postgres:9
+      environment:
+        - "POSTGRES_USER=${DOCKER_NAROU_ANALYZE_DB_USER}"
+        - "POSTGRES_PASSWORD=${DOCKER_NAROU_ANALYZE_DB_PASS}"
+        - "POSTGRES_DB=${DOCKER_NAROU_ANALYZE_DB_NAME}"
+      volumes:
+        - "narou-analyze-db:/var/lib/postgresql/data"
+      restart: always
+  plantuml-image-generator:
+    image: u6kapps/plantuml-image-generator
+    environment:
+      - "VIRTUAL_HOST=plantuml-image-generator.u6k.me"
+      - "VIRTUAL_PORT=8080"
+      - "LETSENCRYPT_HOST=plantuml-image-generator.u6k.me"
+      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+    depends_on:
+      - nginx-proxy
+    restart: always
+  redmine:
+    image: u6kapps/redmine
+    volumes:
+      - "redmine-files:/usr/src/redmine/files"
+    environment:
+      - "REDMINE_DB_POSTGRES=redmine-db"
+      - "REDMINE_DB_USERNAME=${DOCKER_REDMINE_DB_USERNAME}"
+      - "REDMINE_DB_PASSWORD=${DOCKER_REDMINE_DB_PASSWORD}"
+      - "REDMINE_DB_DATABASE=${DOCKER_REDMINE_DB_DATABASE}"
+      - "VIRTUAL_HOST=redmine.u6k.me"
+      - "VIRTUAL_PORT=3000"
+      - "LETSENCRYPT_HOST=redmine.u6k.me"
+      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+    depends_on:
+      - nginx-proxy
+      - redmine-db
+    restart: always
+  redmine-db:
+    image: postgres:10
+    volumes:
+      - "redmine-db:/var/lib/postgresql/data"
+    environment:
+      - "POSTGRES_USER=${DOCKER_REDMINE_DB_USERNAME}"
+      - "POSTGRES_PASSWORD=${DOCKER_REDMINE_DB_PASSWORD}"
+      - "POSTGRES_DB=${DOCKER_REDMINE_DB_DATABASE}"
+    restart: always
+  task-focus:
+    image: u6kapps/task-focus
+    environment:
+      - "VIRTUAL_HOST=task-focus.u6k.me"
+      - "VIRTUAL_PORT=8080"
+      - "LETSENCRYPT_HOST=task-focus.u6k.me"
+      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+    volumes:
+      - "task-focus-db:/var/task-focus"
+    depends_on:
+      - nginx-proxy
+    restart: always
+
+volumes:
+  cert:
+    driver: local
+  htpasswd:
+    driver: local
+  bookmark-db:
+    driver: local
+  investment-machine-db:
+    driver: local
+  jenkins:
+    driver: local
+  narou-analyze-db:
+    driver: local
+  redmine-files:
+    driver: local
+  redmine-db:
+    driver: local
+  task-focus-db:
+    driver: local
