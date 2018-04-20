@@ -5,7 +5,7 @@ timestamps {
         node("master") {
             cleanWs()
             stage("dump") {
-                sh("docker cp ${BOOKMARK_CONTAINER_NAME}:/var/lib/bookmark/hsqldb .")
+                sh("docker cp ${APP_CONTAINER_NAME}:/var/lib/bookmark/hsqldb .")
                 sh("7z a -t7z -mx=9 bookmark.${env.BUILD_TIMESTAMP}.hsqldb.dmp.7z hsqldb/")
                 sh("rm -r hsqldb/")
             }
