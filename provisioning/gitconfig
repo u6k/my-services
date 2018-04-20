@@ -3,6 +3,7 @@
   precomposeunicode = true
   autocrlf = false
   quotepath = false
+  editor = vim
 [color]
   diff = auto
   status = auto
