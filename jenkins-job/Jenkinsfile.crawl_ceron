@@ -2,7 +2,7 @@
 
 timestamps {
     try {
-        node("master") {
+        node {
             stage("crawl") {
                 sh("curl -v -X ${DOWNLOAD_API_HTTP_METHOD} ${DOWNLOAD_API_URL}")
             }

@@ -2,8 +2,8 @@
 
 timestamps {
     try {
-        node("master") {
-            stage("crawle") {
+        node {
+            stage("crawl") {
                 def date = new Date()
                 for (def i = 0; i < 20; i++) {
                     def curlStr = "curl -v -X POST -H 'Content-Type: application/json' -d '{\"searchDate\":\"${date.format('yyyy-MM-dd')}\"}' http://narou-analyze:8080/api/novels/"
