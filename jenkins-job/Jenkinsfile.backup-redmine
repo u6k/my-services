@@ -11,7 +11,7 @@ timestamps {
                 sh("docker cp ${APP_CONTAINER_NAME}:/usr/src/redmine/files/ attachment-file/")
             }
             stage("upload") {
-                withCredentials([usernamePassword(credentialsId: "minio", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
+                withCredentials([usernamePassword(credentialsId: "s3", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
                     sh("aws --endpoint-url ${S3_ENDPOINT} s3 sync . s3://${S3_BUCKET}/")
                 }
             }
