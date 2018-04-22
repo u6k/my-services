@@ -2,9 +2,9 @@
 
 timestamps {
     try {
-        node("master") {
+        node {
             cleanWs()
-            stage("crawle") {
+            stage("crawl") {
                 sh("""
 curl -v -L -o 'google-news.us.world.${env.BUILD_TIMESTAMP}.rss.xml' 'http://news.google.com/news?cf=all&hl=en&ned=us&topic=w&output=rss'
 curl -v -L -o 'google-news.us.us.${env.BUILD_TIMESTAMP}.rss.xml' 'http://news.google.com/news?cf=all&hl=en&ned=us&topic=n&output=rss'
@@ -27,8 +27,8 @@ curl -v -L -o 'google-news.ja.japan.${env.BUILD_TIMESTAMP}.rss.xml' 'http://news
 """)
             }
             stage("upload") {
-                withCredentials([usernamePassword(credentialsId: "minio", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
-                    sh("aws --endpoint-url http://minio:9000 --region us-east-1 s3 sync . s3://google-news")
+                withCredentials([usernamePassword(credentialsId: "s3", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
+                    sh("aws --endpoint-url ${S3_ENDPOINT} --region ${S3_REGION} s3 sync . s3://${S3_BUCKET}/")
                 }
             }
         }

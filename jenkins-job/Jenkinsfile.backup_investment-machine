@@ -2,7 +2,7 @@
 
 timestamps {
     try {
-        node("master") {
+        node {
             cleanWs()
             stage("dump") {
                 sh("docker exec ${env.DB_CONTAINER_NAME} pg_dump -U ${DB_USER} ${DB_NAME} >investment-machine.${env.BUILD_TIMESTAMP}.psql.dmp")
@@ -10,8 +10,8 @@ timestamps {
                 sh("rm investment-machine.${env.BUILD_TIMESTAMP}.psql.dmp")
             }
             stage("upload") {
-                withCredentials([usernamePassword(credentialsId: "minio", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
-                    sh("aws --endpoint-url http://minio:9000 s3 sync . s3://backup.investment-machine/")
+                withCredentials([usernamePassword(credentialsId: "s3", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
+                    sh("aws --endpoint-url ${S3_ENDPOINT} --region ${S3_REGION} s3 sync . s3://${S3_BUCKET}/")
                 }
             }
         }

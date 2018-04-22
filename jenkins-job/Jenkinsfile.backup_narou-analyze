@@ -2,7 +2,7 @@
 
 timestamps {
     try {
-        node("master") {
+        node {
             cleanWs()
             stage("dump") {
                 sh("docker exec documents_narou-analyze-db_1 pg_dump -U ${NAROU_ANALYZE_DB_USER} ${NAROU_ANALYZE_DB_NAME} >narou-analyze.${env.BUILD_TIMESTAMP}.psql.dmp")
