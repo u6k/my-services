@@ -2,16 +2,16 @@
 
 timestamps {
     try {
-        node("master") {
+        node {
             cleanWs()
             stage("dump") {
-                sh("docker cp documents_bookmark_1:/var/lib/bookmark/hsqldb .")
+                sh("docker cp ${APP_CONTAINER_NAME}:/var/lib/bookmark/hsqldb .")
                 sh("7z a -t7z -mx=9 bookmark.${env.BUILD_TIMESTAMP}.hsqldb.dmp.7z hsqldb/")
                 sh("rm -r hsqldb/")
             }
             stage("upload") {
-                withCredentials([usernamePassword(credentialsId: "minio", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
-                    sh("aws --endpoint-url http://minio:9000 s3 sync . s3://backup.bookmark/")
+                withCredentials([usernamePassword(credentialsId: "s3", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
+                    sh("aws --endpoint-url ${S3_ENDPOINT} --region ${S3_REGION} s3 sync . s3://${S3_BUCKET}/")
                 }
             }
         }

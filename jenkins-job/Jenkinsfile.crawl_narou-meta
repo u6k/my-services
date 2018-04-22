@@ -2,8 +2,8 @@
 
 timestamps {
     try {
-        node("master") {
-            stage("crawle") {
+        node {
+            stage("crawl") {
                 def date = new Date()
                 for (def i = 0; i < 20; i++) {
                     def dateStr = date.format("yyyy-MM-dd")

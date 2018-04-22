@@ -1,0 +1,23 @@
+#!groovy
+
+timestamps {
+    try {
+        node {
+            cleanWs()
+            stage("dump") {
+                sh("docker exec ${DB_CONTAINER_NAME} pg_dump -U ${DB_USER} ${DB_NAME} >redmine.${env.BUILD_TIMESTAMP}.psql.dmp")
+                sh("7z a -t7z -mx=9 redmine.${env.BUILD_TIMESTAMP}.psql.dmp.7z redmine.${env.BUILD_TIMESTAMP}.psql.dmp")
+                sh("rm redmine.${env.BUILD_TIMESTAMP}.psql.dmp")
+                sh("docker cp ${APP_CONTAINER_NAME}:/usr/src/redmine/files/ attachment-file/")
+            }
+            stage("upload") {
+                withCredentials([usernamePassword(credentialsId: "s3", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
+                    sh("aws --endpoint-url ${S3_ENDPOINT} --region ${S3_REGION} s3 sync . s3://${S3_BUCKET}/")
+                }
+            }
+        }
+    } catch(Exception e) {
+        slackSend(color: "danger", message: "Fail: ${env.JOB_NAME} #${env.BUILD_NUMBER} ${e}")
+        throw e
+    }
+}

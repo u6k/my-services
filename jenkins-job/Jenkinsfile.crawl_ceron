@@ -2,9 +2,9 @@
 
 timestamps {
     try {
-        node("master") {
-            stage("crawle") {
-                sh("curl -v -X POST http://ceron-analyze:8080/api/categories/download")
+        node {
+            stage("crawl") {
+                sh("curl -v -X ${DOWNLOAD_API_HTTP_METHOD} ${DOWNLOAD_API_URL}")
             }
         }
     } catch(Exception e) {
