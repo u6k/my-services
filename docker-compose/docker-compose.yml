@@ -120,20 +120,20 @@ services:
     volumes:
       - "investment-machine-db:/var/lib/postgresql/data"
     restart: always
-#  jenkins:
-#    image: u6kapps/jenkins
-#    volumes:
-#      - "jenkins:/root/.jenkins"
-#      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-#    environment:
-#      - "VIRTUAL_HOST=jenkins.u6k.me"
-#      - "VIRTUAL_PORT=8080"
-#      - "LETSENCRYPT_HOST=jenkins.u6k.me"
-#      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
-#    depends_on:
-#      - minio
-#      - nginx-proxy
-#    restart: always
+  jenkins:
+    image: u6kapps/jenkins
+    volumes:
+      - "jenkins:/root/.jenkins"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    environment:
+      - "VIRTUAL_HOST=jenkins.u6k.me"
+      - "VIRTUAL_PORT=8080"
+      - "LETSENCRYPT_HOST=jenkins.u6k.me"
+      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+    depends_on:
+      - minio
+      - nginx-proxy
+    restart: always
 #  narou-analyze:
 #    image: u6kapps/narou-analyze
 #    environment:
