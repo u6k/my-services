@@ -120,44 +120,44 @@ services:
     volumes:
       - "investment-machine-db:/var/lib/postgresql/data"
     restart: always
-  jenkins:
-    image: u6kapps/jenkins
-    volumes:
-      - "jenkins:/root/.jenkins"
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-    environment:
-      - "VIRTUAL_HOST=jenkins.u6k.me"
-      - "VIRTUAL_PORT=8080"
-      - "LETSENCRYPT_HOST=jenkins.u6k.me"
-      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
-    depends_on:
-      - minio
-      - nginx-proxy
-    restart: always
-  narou-analyze:
-    image: u6kapps/narou-analyze
-    environment:
-      - "NAROU_CRAWLER_DB_HOST=narou-analyze-db"
-      - "NAROU_CRAWLER_DB_USER=${DOCKER_NAROU_ANALYZE_DB_USER}"
-      - "NAROU_CRAWLER_DB_PASS=${DOCKER_NAROU_ANALYZE_DB_PASS}"
-      - "NAROU_CRAWLER_DB_NAME=${DOCKER_NAROU_ANALYZE_DB_NAME}"
-      - "VIRTUAL_HOST=narou-analyze.u6k.me"
-      - "VIRTUAL_PORT=8080"
-      - "LETSENCRYPT_HOST=narou-analyze.u6k.me"
-      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
-    depends_on:
-      - nginx-proxy
-      - narou-analyze-db
-    restart: always
-  narou-analyze-db:
-      image: postgres:9
-      environment:
-        - "POSTGRES_USER=${DOCKER_NAROU_ANALYZE_DB_USER}"
-        - "POSTGRES_PASSWORD=${DOCKER_NAROU_ANALYZE_DB_PASS}"
-        - "POSTGRES_DB=${DOCKER_NAROU_ANALYZE_DB_NAME}"
-      volumes:
-        - "narou-analyze-db:/var/lib/postgresql/data"
-      restart: always
+#  jenkins:
+#    image: u6kapps/jenkins
+#    volumes:
+#      - "jenkins:/root/.jenkins"
+#      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+#    environment:
+#      - "VIRTUAL_HOST=jenkins.u6k.me"
+#      - "VIRTUAL_PORT=8080"
+#      - "LETSENCRYPT_HOST=jenkins.u6k.me"
+#      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+#    depends_on:
+#      - minio
+#      - nginx-proxy
+#    restart: always
+#  narou-analyze:
+#    image: u6kapps/narou-analyze
+#    environment:
+#      - "NAROU_CRAWLER_DB_HOST=narou-analyze-db"
+#      - "NAROU_CRAWLER_DB_USER=${DOCKER_NAROU_ANALYZE_DB_USER}"
+#      - "NAROU_CRAWLER_DB_PASS=${DOCKER_NAROU_ANALYZE_DB_PASS}"
+#      - "NAROU_CRAWLER_DB_NAME=${DOCKER_NAROU_ANALYZE_DB_NAME}"
+#      - "VIRTUAL_HOST=narou-analyze.u6k.me"
+#      - "VIRTUAL_PORT=8080"
+#      - "LETSENCRYPT_HOST=narou-analyze.u6k.me"
+#      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+#    depends_on:
+#      - nginx-proxy
+#      - narou-analyze-db
+#    restart: always
+#  narou-analyze-db:
+#      image: postgres:9
+#      environment:
+#        - "POSTGRES_USER=${DOCKER_NAROU_ANALYZE_DB_USER}"
+#        - "POSTGRES_PASSWORD=${DOCKER_NAROU_ANALYZE_DB_PASS}"
+#        - "POSTGRES_DB=${DOCKER_NAROU_ANALYZE_DB_NAME}"
+#      volumes:
+#        - "narou-analyze-db:/var/lib/postgresql/data"
+#      restart: always
   plantuml-image-generator:
     image: u6kapps/plantuml-image-generator
     environment:
@@ -194,18 +194,18 @@ services:
       - "POSTGRES_PASSWORD=${DOCKER_REDMINE_DB_PASSWORD}"
       - "POSTGRES_DB=${DOCKER_REDMINE_DB_DATABASE}"
     restart: always
-  task-focus:
-    image: u6kapps/task-focus
-    environment:
-      - "VIRTUAL_HOST=task-focus.u6k.me"
-      - "VIRTUAL_PORT=8080"
-      - "LETSENCRYPT_HOST=task-focus.u6k.me"
-      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
-    volumes:
-      - "task-focus-db:/var/task-focus"
-    depends_on:
-      - nginx-proxy
-    restart: always
+#  task-focus:
+#    image: u6kapps/task-focus
+#    environment:
+#      - "VIRTUAL_HOST=task-focus.u6k.me"
+#      - "VIRTUAL_PORT=8080"
+#      - "LETSENCRYPT_HOST=task-focus.u6k.me"
+#      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+#    volumes:
+#      - "task-focus-db:/var/task-focus"
+#    depends_on:
+#      - nginx-proxy
+#    restart: always
 
 volumes:
   cert:
