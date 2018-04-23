@@ -4,7 +4,7 @@ timestamps {
     try {
         node {
             stage("update") {
-                withCredentials([usernamePassword(credentialsId: "${TARGET_MYDNS_CREDENTIAL}", usernameVariable: "MYDNS_USER", passwordVariable: "MYDNS_PASS")]) {
+                withCredentials([usernamePassword(credentialsId: "mydns", usernameVariable: "MYDNS_USER", passwordVariable: "MYDNS_PASS")]) {
                     sh("curl -v http://${MYDNS_USER}:${MYDNS_PASS}@www.mydns.jp/login.html")
                 }
             }
