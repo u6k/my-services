@@ -120,20 +120,6 @@ services:
     volumes:
       - "investment-machine-db:/var/lib/postgresql/data"
     restart: always
-  jenkins:
-    image: u6kapps/jenkins
-    volumes:
-      - "jenkins:/root/.jenkins"
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-    environment:
-      - "VIRTUAL_HOST=jenkins.u6k.me"
-      - "VIRTUAL_PORT=8080"
-      - "LETSENCRYPT_HOST=jenkins.u6k.me"
-      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
-    depends_on:
-      - minio
-      - nginx-proxy
-    restart: always
 #  narou-analyze:
 #    image: u6kapps/narou-analyze
 #    environment:
@@ -206,6 +192,29 @@ services:
 #    depends_on:
 #      - nginx-proxy
 #    restart: always
+  rundeck:
+    image: u6kapps/rundeck
+    environment:
+      - "RDECK_URL=https:\\/\\/rundeck\\.u6k\\.me"
+      - "RDECK_ADMIN_USER=${DOCKER_RDECK_ADMIN_USER}"
+      - "RDECK_ADMIN_PASS=${DOCKER_RDECK_ADMIN_PASS}"
+      - "AWS_ACCESS_KEY_ID=${DOCKER_MINIO_ACCESS_KEY}"
+      - "AWS_SECRET_ACCESS_KEY=${DOCKER_MINIO_SECRET_KEY}"
+      - "AWS_DEFAULT_REGION=us-east-1"
+      - "AWS_S3_ENDPOINT=http://minio:9000"
+      - "VIRTUAL_HOST=rundeck.u6k.me"
+      - "VIRTUAL_PORT=4440"
+      - "LETSENCRYPT_HOST=rundeck.u6k.me"
+      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "rundeck_projects:/opt/rundeck/projects/"
+      - "rundeck_data:/opt/rundeck/server/data/"
+      - "rundeck_logs:/opt/rundeck/var/logs/"
+    depends_on:
+      - nginx-proxy
+      - minio
+    restart: always
 
 volumes:
   cert:
@@ -216,8 +225,6 @@ volumes:
     driver: local
   investment-machine-db:
     driver: local
-  jenkins:
-    driver: local
   narou-analyze-db:
     driver: local
   redmine-files:
@@ -225,4 +232,10 @@ volumes:
   redmine-db:
     driver: local
   task-focus-db:
+    driver: local
+  rundeck_projects:
+    driver: local
+  rundeck_data:
+    driver: local
+  rundeck_logs:
     driver: local
