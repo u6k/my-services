@@ -1,0 +1,49 @@
+version: '2'
+
+services:
+  nginx-proxy:
+    image: u6kapps/nginx-proxy
+    privileged: true
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "cert:/etc/nginx/certs:ro"
+      - "htpasswd:/etc/nginx/htpasswd:ro"
+      - "/etc/nginx/vhost.d"
+      - "/usr/share/nginx/html"
+      - "/var/run/docker.sock:/tmp/docker.sock:ro"
+    restart: always
+  cert:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    privileged: true
+    volumes:
+      - "cert:/etc/nginx/certs:rw"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    volumes_from:
+      - nginx-proxy
+    depends_on:
+      - nginx-proxy
+    restart: always
+  minio:
+    image: minio/minio
+    volumes:
+      - "${DOCKER_VOLUMES}/minio/export:/export"
+      - "${DOCKER_VOLUMES}/minio/config:/root/.minio"
+    environment:
+      - "MINIO_ACCESS_KEY=${DOCKER_MINIO_ACCESS_KEY}"
+      - "MINIO_SECRET_KEY=${DOCKER_MINIO_SECRET_KEY}"
+      - "VIRTUAL_HOST=minio2.u6k.me"
+      - "VIRTUAL_PORT=9000"
+      - "LETSENCRYPT_HOST=minio2.u6k.me"
+      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+    command: server /export
+    depends_on:
+      - nginx-proxy
+    restart: always
+
+volumes:
+  cert:
+    driver: local
+  htpasswd:
+    driver: local
