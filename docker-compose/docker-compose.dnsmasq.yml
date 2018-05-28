@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  dnsmasq:
+    image: andyshinn/dnsmasq
+    ports:
+      - "53:53/udp"
+      - "53:53/tcp"
+    extra_hosts:
+      - "blog.u6k.me:192.168.3.200"
+    cap_add:
+      - NET_ADMIN
+    restart: always
+
+networks:
+  default:
+    external:
+      name: docker_default
