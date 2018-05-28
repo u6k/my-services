@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  extract-content:
+    image: u6kapps/extract-content
+    environment:
+      - "VIRTUAL_HOST=extract-content.u6k.me"
+      - "VIRTUAL_PORT=5000"
+      - "LETSENCRYPT_HOST=extract-content.u6k.me"
+      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+    restart: always
+
+networks:
+  default:
+    external:
+      name: docker_default

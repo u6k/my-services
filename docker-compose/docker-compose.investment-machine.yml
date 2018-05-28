@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  investment-machine-app:
+    image: u6kapps/investment-machine
+    environment:
+      - "RAILS_ENV=production"
+      - "RAILS_LOG_TO_STDOUT=true"
+      - "SECRET_KEY_BASE=${DOCKER_INVESTMENT_SECRET_KEY_BASE}"
+      - "DB_HOST=investment-machine-db"
+      - "DB_USERNAME=${DOCKER_INVESTMENT_DB_USER}"
+      - "DB_PASSWORD=${DOCKER_INVESTMENT_DB_PASS}"
+      - "DB_DATABASE=${DOCKER_INVESTMENT_DB_NAME}"
+      - "S3_ENDPOINT=http://minio:9000"
+      - "S3_REGION=us-east-1"
+      - "S3_ACCESS_KEY=${DOCKER_MINIO_ACCESS_KEY}"
+      - "S3_SECRET_KEY=${DOCKER_MINIO_SECRET_KEY}"
+      - "S3_BUCKET=investment"
+      - "VIRTUAL_HOST=investment-machine.u6k.me"
+      - "VIRTUAL_PORT=3000"
+      - "LETSENCRYPT_HOST=investment-machine.u6k.me"
+      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+    depends_on:
+      - investment-machine-db
+    restart: always
+  investment-machine-db:
+    image: postgres:10
+    environment:
+      - "POSTGRES_USER=${DOCKER_INVESTMENT_DB_USER}"
+      - "POSTGRES_PASSWORD=${DOCKER_INVESTMENT_DB_PASS}"
+      - "POSTGRES_DB=${DOCKER_INVESTMENT_DB_NAME}"
+    volumes:
+      - "investment-machine-db:/var/lib/postgresql/data"
+    restart: always
+
+volumes:
+  investment-machine-db:
+    driver: local
