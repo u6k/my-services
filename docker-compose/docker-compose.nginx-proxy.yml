@@ -8,8 +8,8 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - "cert:/etc/nginx/certs:ro"
-      - "htpasswd:/etc/nginx/htpasswd:ro"
+      - "${DOCKER_VOLUMES}/nginx-proxy/certs:/etc/nginx/certs:ro"
+      - "${DOCKER_VOLUMES}/nginx-proxy/htpasswd:/etc/nginx/htpasswd:ro"
       - "/etc/nginx/vhost.d"
       - "/usr/share/nginx/html"
       - "/var/run/docker.sock:/tmp/docker.sock:ro"
@@ -18,19 +18,13 @@ services:
     image: jrcs/letsencrypt-nginx-proxy-companion
     privileged: true
     volumes:
-      - "cert:/etc/nginx/certs:rw"
+      - "${DOCKER_VOLUMES}/nginx-proxy/certs:/etc/nginx/certs:rw"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     volumes_from:
       - nginx-proxy
     depends_on:
       - nginx-proxy
     restart: always
-
-volumes:
-  cert:
-    driver: local
-  htpasswd:
-    driver: local
 
 #networks:
 #  default:
