@@ -25,8 +25,3 @@ services:
     depends_on:
       - nginx-proxy
     restart: always
-
-#networks:
-#  default:
-#    external:
-#      name: bridge

@@ -22,9 +22,5 @@ services:
       - "POSTGRES_PASSWORD=${DOCKER_NAROU_ANALYZE_DB_PASS}"
       - "POSTGRES_DB=${DOCKER_NAROU_ANALYZE_DB_NAME}"
     volumes:
-      - "narou-analyze-db:/var/lib/postgresql/data"
+      - "${DOCKER_VOLUMES}/narou-analyze/db:/var/lib/postgresql/data"
     restart: always
-
-volumes:
-  narou-analyze-db:
-    driver: local

@@ -30,9 +30,5 @@ services:
       - "POSTGRES_PASSWORD=${DOCKER_INVESTMENT_DB_PASS}"
       - "POSTGRES_DB=${DOCKER_INVESTMENT_DB_NAME}"
     volumes:
-      - "investment-machine-db:/var/lib/postgresql/data"
+      - "${DOCKER_VOLUMES}/investment-machine/db:/var/lib/postgresql/data"
     restart: always
-
-volumes:
-  investment-machine-db:
-    driver: local
