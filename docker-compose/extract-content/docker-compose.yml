@@ -4,7 +4,7 @@ services:
   extract-content:
     image: u6kapps/extract-content
     environment:
-      - "VIRTUAL_HOST=extract-content.u6k.me"
+      - "VIRTUAL_HOST=extract-content.u6k.me,extract-content.192.168.3.200.xip.io"
       - "VIRTUAL_PORT=5000"
       - "LETSENCRYPT_HOST=extract-content.u6k.me"
       - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
