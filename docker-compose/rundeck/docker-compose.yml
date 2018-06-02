@@ -11,7 +11,7 @@ services:
       - "AWS_SECRET_ACCESS_KEY=${DOCKER_MINIO_SECRET_KEY}"
       - "AWS_DEFAULT_REGION=us-east-1"
       - "AWS_S3_ENDPOINT=http://minio:9000"
-      - "VIRTUAL_HOST=rundeck.u6k.me"
+      - "VIRTUAL_HOST=rundeck.u6k.me,rundeck.192.168.3.200.xip.io"
       - "VIRTUAL_PORT=4440"
       - "LETSENCRYPT_HOST=rundeck.u6k.me"
       - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"

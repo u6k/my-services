@@ -16,7 +16,7 @@ services:
       - "S3_ACCESS_KEY=${DOCKER_MINIO_ACCESS_KEY}"
       - "S3_SECRET_KEY=${DOCKER_MINIO_SECRET_KEY}"
       - "S3_BUCKET=investment"
-      - "VIRTUAL_HOST=investment-machine.u6k.me"
+      - "VIRTUAL_HOST=investment-machine.u6k.me,investment-machine.192.168.3.200.xip.io"
       - "VIRTUAL_PORT=3000"
       - "LETSENCRYPT_HOST=investment-machine.u6k.me"
       - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
