@@ -4,7 +4,7 @@ services:
   redmine:
     image: u6kapps/redmine
     volumes:
-      - "redmine-files:/usr/src/redmine/files"
+      - "${DOCKER_VOLUMES}/redmine/files:/usr/src/redmine/files"
     environment:
       - "REDMINE_DB_POSTGRES=redmine-db"
       - "REDMINE_DB_USERNAME=${DOCKER_REDMINE_DB_USERNAME}"
@@ -20,18 +20,12 @@ services:
   redmine-db:
     image: postgres:10
     volumes:
-      - "redmine-db:/var/lib/postgresql/data"
+      - "${DOCKER_VOLUMES}/redmine/db:/var/lib/postgresql/data"
     environment:
       - "POSTGRES_USER=${DOCKER_REDMINE_DB_USERNAME}"
       - "POSTGRES_PASSWORD=${DOCKER_REDMINE_DB_PASSWORD}"
       - "POSTGRES_DB=${DOCKER_REDMINE_DB_DATABASE}"
     restart: always
-
-volumes:
-  redmine-files:
-    driver: local
-  redmine-db:
-    driver: local
 
 networks:
   default:

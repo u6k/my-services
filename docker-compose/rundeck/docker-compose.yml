@@ -17,18 +17,10 @@ services:
       - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "rundeck_projects:/opt/rundeck/projects/"
-      - "rundeck_data:/opt/rundeck/server/data/"
-      - "rundeck_logs:/opt/rundeck/var/logs/"
+      - "${DOCKER_VOLUMES}/rundeck/projects:/opt/rundeck/projects/"
+      - "${DOCKER_VOLUMES}/rundeck/data:/opt/rundeck/server/data/"
+      - "${DOCKER_VOLUMES}/rundeck/logs:/opt/rundeck/var/logs/"
     restart: always
-
-volumes:
-  rundeck_projects:
-    driver: local
-  rundeck_data:
-    driver: local
-  rundeck_logs:
-    driver: local
 
 networks:
   default:
