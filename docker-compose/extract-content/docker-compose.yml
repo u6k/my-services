@@ -1,16 +1,16 @@
 version: '3'
 
 services:
-  extract-content:
+  app:
     image: u6kapps/extract-content
     environment:
-      - "VIRTUAL_HOST=extract-content.u6k.me,extract-content.192.168.3.200.xip.io"
+      - "VIRTUAL_HOST=${DOCKER_EXTRACT_CONTENT_VIRTUAL_HOST}"
       - "VIRTUAL_PORT=5000"
-      - "LETSENCRYPT_HOST=extract-content.u6k.me"
-      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+      - "LETSENCRYPT_HOST=${DOCKER_EXTRACT_CONTENT_LETSENCRYPT_HOST}"
+      - "LETSENCRYPT_EMAIL=${DOCKER_EXTRACT_CONTENT_LETSENCRYPT_EMAIL}"
     restart: always
 
 networks:
   default:
     external:
-      name: docker_default
+      name: production
