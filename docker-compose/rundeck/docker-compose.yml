@@ -1,20 +1,20 @@
 version: '3'
 
 services:
-  rundeck:
+  app:
     image: u6kapps/rundeck
     environment:
-      - "RDECK_URL=https:\\/\\/rundeck\\.u6k\\.me"
+      - "RDECK_URL=${DOCKER_RDECK_URL}"
       - "RDECK_ADMIN_USER=${DOCKER_RDECK_ADMIN_USER}"
       - "RDECK_ADMIN_PASS=${DOCKER_RDECK_ADMIN_PASS}"
-      - "AWS_ACCESS_KEY_ID=${DOCKER_MINIO_ACCESS_KEY}"
-      - "AWS_SECRET_ACCESS_KEY=${DOCKER_MINIO_SECRET_KEY}"
-      - "AWS_DEFAULT_REGION=us-east-1"
-      - "AWS_S3_ENDPOINT=http://minio:9000"
-      - "VIRTUAL_HOST=rundeck.u6k.me,rundeck.192.168.3.200.xip.io"
+      - "AWS_ACCESS_KEY_ID=${DOCKER_RDECK_S3_ACCESS_KEY}"
+      - "AWS_SECRET_ACCESS_KEY=${DOCKER_RDECK_S3_SECRET_KEY}"
+      - "AWS_DEFAULT_REGION=${DOCKER_RDECK_S3_REGION}"
+      - "AWS_S3_ENDPOINT=${DOCKER_RDECK_S3_URL}"
+      - "VIRTUAL_HOST=${DOCKER_RDECK_VIRTUAL_HOST}"
       - "VIRTUAL_PORT=4440"
-      - "LETSENCRYPT_HOST=rundeck.u6k.me"
-      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+      - "LETSENCRYPT_HOST=${DOCKER_RDECK_LETSENCRYPT_HOST}"
+      - "LETSENCRYPT_EMAIL=${DOCKER_RDECK_LETSENCRYPT_EMAIL}"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "${DOCKER_VOLUMES}/rundeck/projects:/opt/rundeck/projects/"
@@ -25,4 +25,4 @@ services:
 networks:
   default:
     external:
-      name: docker_default
+      name: production
