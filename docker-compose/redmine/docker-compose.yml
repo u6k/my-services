@@ -1,39 +1,33 @@
 version: '3'
 
 services:
-  redmine:
+  app:
     image: u6kapps/redmine
     volumes:
-      - "redmine-files:/usr/src/redmine/files"
+      - "${DOCKER_VOLUMES}/redmine/files:/usr/src/redmine/files"
     environment:
-      - "REDMINE_DB_POSTGRES=redmine-db"
+      - "REDMINE_DB_POSTGRES=${DOCKER_REDMINE_DB_HOST}"
       - "REDMINE_DB_USERNAME=${DOCKER_REDMINE_DB_USERNAME}"
       - "REDMINE_DB_PASSWORD=${DOCKER_REDMINE_DB_PASSWORD}"
       - "REDMINE_DB_DATABASE=${DOCKER_REDMINE_DB_DATABASE}"
-      - "VIRTUAL_HOST=redmine.u6k.me"
+      - "VIRTUAL_HOST=${DOCKER_REDMINE_VIRTUAL_HOST}"
       - "VIRTUAL_PORT=3000"
-      - "LETSENCRYPT_HOST=redmine.u6k.me"
-      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+      - "LETSENCRYPT_HOST=${DOCKER_REDMINE_LETSENCRYPT_HOST}"
+      - "LETSENCRYPT_EMAIL=${DOCKER_REDMINE_LETSENCRYPT_EMAIL}"
     depends_on:
-      - redmine-db
+      - db
     restart: always
-  redmine-db:
+  db:
     image: postgres:10
     volumes:
-      - "redmine-db:/var/lib/postgresql/data"
+      - "${DOCKER_VOLUMES}/redmine/db:/var/lib/postgresql/data"
     environment:
       - "POSTGRES_USER=${DOCKER_REDMINE_DB_USERNAME}"
       - "POSTGRES_PASSWORD=${DOCKER_REDMINE_DB_PASSWORD}"
       - "POSTGRES_DB=${DOCKER_REDMINE_DB_DATABASE}"
     restart: always
 
-volumes:
-  redmine-files:
-    driver: local
-  redmine-db:
-    driver: local
-
 networks:
   default:
     external:
-      name: docker_default
+      name: production

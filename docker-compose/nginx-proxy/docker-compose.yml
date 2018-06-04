@@ -1,7 +1,7 @@
 version: '2'
 
 services:
-  nginx-proxy:
+  proxy:
     image: u6kapps/nginx-proxy
     privileged: true
     ports:
@@ -21,12 +21,12 @@ services:
       - "${DOCKER_VOLUMES}/nginx-proxy/certs:/etc/nginx/certs:rw"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     volumes_from:
-      - nginx-proxy
+      - proxy
     depends_on:
-      - nginx-proxy
+      - proxy
     restart: always
 
-#networks:
-#  default:
-#    external:
-#      name: bridge
+networks:
+  default:
+    external:
+      name: production
