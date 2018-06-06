@@ -154,13 +154,13 @@
       template:
         src: 'vimrc'
         dest: '/home/{{sshd_user}}/.vimrc'
-    - name: Download NeoBundle Installer
-      get_url:
-        url: https://raw.githubusercontent.com/Shougo/neobundle.vim/master/bin/install.sh
-        dest: /tmp/neobundle-installer.sh
-        owner: '{{sshd_user}}'
-        group: '{{sshd_user}}'
-        mode: 0744
-    - name: Install NeoBundle
-      command: /tmp/neobundle-installer.sh
-      become_user: '{{sshd_user}}'
+#    - name: Download NeoBundle Installer
+#      get_url:
+#        url: https://raw.githubusercontent.com/Shougo/neobundle.vim/master/bin/install.sh
+#        dest: /tmp/neobundle-installer.sh
+#        owner: '{{sshd_user}}'
+#        group: '{{sshd_user}}'
+#        mode: 0744
+#    - name: Install NeoBundle
+#      command: /tmp/neobundle-installer.sh
+#      become_user: '{{sshd_user}}'
