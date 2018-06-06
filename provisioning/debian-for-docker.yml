@@ -118,6 +118,8 @@
         - vim
         - zip
         - p7zip-full
+        - parted
+        - lvm2
     # Setting git
     - name: Copy git config
       template:
