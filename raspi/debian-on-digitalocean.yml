@@ -138,7 +138,7 @@
         dest: /var/raspi/
     - name: Create start qemu shell
       copy:
-        dest: /var/raspi/raspi-start.sh
+        dest: /var/raspi/start-raspi.sh
         mode: 0777
         content: |
           qemu-system-arm \
