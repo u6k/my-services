@@ -38,6 +38,10 @@
       template:
         src: 'id_rsa.pub'
         dest: '/home/{{sshd_user}}/.ssh/authorized_keys'
+    - name: Disable pi user
+      user:
+        name: pi
+        expires: -1
     # Setting SSH
     - name: Setting SSH
       lineinfile:
