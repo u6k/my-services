@@ -49,8 +49,7 @@ Dropletを作成したら、`root`でsshログインします。
 Ansible Playbookを実行するために、最低限のソフトウェアをインストールします。
 
 ```
-apt update
-apt -y upgrade
+apt update && apt -y upgrade
 apt -y install git ansible python-apt
 ```
 
@@ -86,11 +85,138 @@ ansible-playbook debian-on-digitalocean.yml -i hosts
 
 ## Usage
 
-Raspbian Stretch Lite仮想マシンを起動するには、次のコマンドを実行します。
+### Raspbian Stretch Lite仮想マシンを起動
+
+Raspbian Stretch Lite仮想マシンを起動するには、次のコマンドを実行します。ユーザーは`pi`、パスワードは`raspberry`です。
 
 ```
 cd /var/raspi/
 ./start-raspi.sh
+```
+
+これだけで一応は使用可能ですが、いくつかの手順を実行すべきです。
+
+### ストレージ容量を拡張
+
+Raspbianイメージそのままだと空き容量が約1GBほどしかないので、イメージを拡張するべきです。Ansible Playbookの実行中に、実はRaspbianイメージを拡張していますが、これだけでは不十分で、Raspbian側でも実行する手順があります。なお、この手順は最初の一回のみ行います。
+
+パーティションを操作するため、`fdisk`を実行します。
+
+```
+$ sudo fdisk /dev/sda
+
+Welcome to fdisk (util-linux 2.29.2).
+Changes will remain in memory only, until you decide to write them.
+Be careful before using the write command.
+```
+
+パーティションのリストを表示して、`/dev/sda2`の`Start`の値を覚えておきます。
+
+```
+Command (m for help): p
+
+Disk /dev/sda: 5.8 GiB, 6161432576 bytes, 12034048 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x7ee80803
+
+Device     Boot Start     End Sectors  Size Id Type
+/dev/sda1        8192   98045   89854 43.9M  c W95 FAT32 (LBA)
+/dev/sda2       98304 3645439 3547136  1.7G 83 Linux
+```
+
+`/dev/sda2`を削除します。
+
+```
+Command (m for help): d
+Partition number (1,2, default 2): 2
+
+Partition 2 has been deleted.
+```
+
+パーティションを作成します。
+
+```
+Command (m for help): n
+Partition type
+   p   primary (1 primary, 0 extended, 3 free)
+   e   extended (container for logical partitions)
+Select (default p): p
+Partition number (2-4, default 2): 2
+First sector (2048-12034047, default 2048): 98304
+Last sector, +sectors or +size{K,M,G,T,P} (98304-12034047, default 12034047):
+
+Created a new partition 2 of type 'Linux' and of size 5.7 GiB.
+Partition #2 contains a ext4 signature.
+
+Do you want to remove the signature? [Y]es/[N]o: n
+```
+
+パーティション情報を反映して、`fdisk`を終了します。
+
+```
+Command (m for help): w
+
+The partition table has been altered.
+Calling ioctl() to re-read partition table.
+Re-reading the partition table failed.: デバイスもしくはリソースがビジー状態です
+
+The kernel still uses the old table. The new table will be used at the next reboot or after you run partprobe(8) or kpartx(8).
+```
+
+Raspbianを再起動します。
+
+```
+$ sudo halt
+```
+
+```
+$ ./start-raspi.sh
+```
+
+ファイルシステムのリサイズします。
+
+```
+$ sudo resize2fs /dev/sda2
+resize2fs 1.43.4 (31-Jan-2017)
+Filesystem at /dev/sda2 is mounted on /; on-line resizing required
+old_desc_blocks = 1, new_desc_blocks = 1
+The filesystem on /dev/sda2 is now 1491968 (4k) blocks long.
+```
+
+`df`でファイルシステムを確認してみると、ストレージ容量が拡張されていることが分かります。
+
+```
+$ df -h
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/root       9.6G  1.1G  8.1G  12% /
+devtmpfs        124M     0  124M   0% /dev
+tmpfs           124M     0  124M   0% /dev/shm
+tmpfs           124M  1.9M  122M   2% /run
+tmpfs           5.0M     0  5.0M   0% /run/lock
+tmpfs           124M     0  124M   0% /sys/fs/cgroup
+/dev/sda1        44M   23M   22M  51% /boot
+tmpfs            25M     0   25M   0% /run/user/1000
+```
+
+### スワップ領域を追加
+
+Raspbian仮想マシンはメモリが256MBしかないため、すぐにメモリを使い果たしてしまいます。そこで、スワップ領域を追加することでメモリ不足に対応します。`mkswap`は1回のみでよいですが、`swapon`はRaspbian仮想マシンの起動ごとに実行する必要があります。
+
+Ansible Playbookの実行時に、`temp.img`というイメージを作成しており、`sdb`としてマウント済みです。ですので、次のコマンドでスワップ領域を作成することができます。
+
+```
+$ sudo mkswap /dev/sdb
+Setting up swapspace version 1, size = 4 GiB (4294963200 bytes)
+no label, UUID=c9aeeeea-f89e-4c7b-9ade-ee18a2736d15
+```
+
+`/dev/sdb`をスワップ領域として有効にするため、次のコマンドを実行します。
+
+```
+$ sudo swapon /dev/sdb
 ```
 
 ## Maintainer
