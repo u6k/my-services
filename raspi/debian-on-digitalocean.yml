@@ -134,6 +134,19 @@
         dest: /var/raspi/
         owner: '{{sshd_user}}'
         group: '{{sshd_user}}'
+    - name: Resize Raspbian image
+      shell: qemu-img resize 2018-11-13-raspbian-stretch-lite.img +8G
+      args:
+        chdir: /var/raspi
+    - name: Create swap storage
+      shell: qemu-img create -f raw temp.img 4G
+      args:
+        chdir: /var/raspi
+    - name: Change file owner of swap storage
+      file:
+        path: /var/raspi/temp.img
+        owner: '{{sshd_user}}'
+        group: '{{sshd_user}}'
     - name: Download QEMU kernel driver
       get_url:
         url: https://github.com/dhruvvyas90/qemu-rpi-kernel/raw/master/kernel-qemu-4.14.50-stretch
@@ -163,6 +176,7 @@
             -serial stdio \
             -append "root=/dev/sda2 panic=1 rootfstype=ext4 rw" \
             -hda 2018-11-13-raspbian-stretch-lite.img \
+            -hdb temp.img \
             -net nic \
             -net user,hostfwd=tcp::10022-:22 \
             -curses
