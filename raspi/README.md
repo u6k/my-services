@@ -219,6 +219,49 @@ no label, UUID=c9aeeeea-f89e-4c7b-9ade-ee18a2736d15
 $ sudo swapon /dev/sdb
 ```
 
+### OS設定
+
+Raspbianでおなじみの`raspi-config`を実行します。
+
+```
+$ sudo raspi-config
+```
+
+次の項目を変更すればよいです。
+
+- 4 Localisation Options
+  - I1 Change Locale
+    - ja_JP.UTF-8
+  - I2 Change Timezone
+    - Asia/Tokyo
+- 5 Interfacing Options
+  - P2 SSH
+- 6 Overclock
+  - Turbo
+- 8 Update
+
+### ファームウェアを更新
+
+ファームウェアを更新します。
+
+```
+$ sudo rpi-update
+```
+
+### バックアップ
+
+これで、いろいろ実験できるRaspbian仮想マシンが整いました。念のため、バックアップを取得しておきます。Raspbian仮想マシンをシャットダウンして、イメージをコピーします。
+
+```
+$ sudo halt
+```
+
+```
+$ cp 2018-11-13-raspbian-stretch-lite.img 2018-11-13-raspbian-stretch-lite.img.bak
+```
+
+何かあっても、`.bak`ファイルで上書きすれば、現時点の状況まで戻ります。
+
 ## Maintainer
 
 - u6k
