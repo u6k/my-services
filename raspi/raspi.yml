@@ -99,6 +99,13 @@
         - tig
         - tmux
         - vim
+        - lvm2
+        - exfat-fuse
+        - exfat-utils
+        - ufw
+        - zip
+        - p7zip-full
+        - parted
     # Setting git
     - name: Copy git config
       template:
