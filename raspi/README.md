@@ -240,6 +240,12 @@ $ sudo raspi-config
   - Turbo
 - 8 Update
 
+これで、Raspbian仮想マシンのsshが有効化されます。試しに、DropletからRaspbian仮想マシンにssh接続してみます。
+
+```
+$ ssh -p 10022 pi@localhost
+```
+
 ### ファームウェアを更新
 
 ファームウェアを更新します。
@@ -261,6 +267,30 @@ $ cp 2018-11-13-raspbian-stretch-lite.img 2018-11-13-raspbian-stretch-lite.img.b
 ```
 
 何かあっても、`.bak`ファイルで上書きすれば、現時点の状況まで戻ります。
+
+### Ansible PlaybookをRaspbian仮想マシンに実行
+
+Raspbian仮想マシンをセットアップするために、Ansible Playbookを実行します。実行手順は、DropletにAnsible Playbookを実行した時と同様です。念のため、次に簡単に説明します。
+
+改めて、`my-services`リポジトリをダウンロードします。
+
+```
+git clone git@github.com:u6k/my-services.git
+```
+
+公開鍵を`id_rsa.pub`ファイルとして作成します。
+
+`settings.yml.example`を参考に、`settings.yml`を作成します。
+
+`hosts`ファイルに記載されている`localhost:22`を`localhost:10022`に変更します。これは、Raspbian仮想マシンのsshポートが`10022`だからです。
+
+Ansible Playbookを実行します。
+
+```
+ansible-playbook raspi.yml -i hosts --ask-pass
+```
+
+Raspbian仮想マシンには`pi`ユーザーでsshログインを行いますが、その時のパスワードを指定するために`--ask-pass`オプションを指定します。
 
 ## Maintainer
 
