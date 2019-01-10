@@ -77,7 +77,7 @@ Ansible Playbookを実行する前に、各種設定を行います。
 いよいよ、Ansible Playbookを実行します。
 
 ```
-ansible-playbook debian-for-digitalocean.yml -i hosts
+ansible-playbook debian-on-digitalocean.yml -i hosts
 ```
 
 問題なく終了したら、まずはsshログイン確認を行います。万が一、ssh設定が失敗していた場合、ログインすらできなくなってしまうので。
