@@ -110,7 +110,7 @@
     - name: Setting git config
       lineinfile:
         dest: '/home/{{sshd_user}}/.gitconfig'
-        insertafter: '^\[user\]&'
+        insertafter: '^\[user\]$'
         line: '{{item}}'
       with_items:
         - '  name = {{git_user_name}}'
