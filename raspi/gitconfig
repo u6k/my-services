@@ -1,0 +1,12 @@
+[user]
+[core]
+  precomposeunicode = true
+  autocrlf = false
+  quotepath = false
+  editor = vim
+[color]
+  diff = auto
+  status = auto
+  branch = auto
+[push]
+  default = simple
