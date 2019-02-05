@@ -150,7 +150,7 @@
         group: '{{sshd_user}}'
     - name: Download QEMU kernel driver
       get_url:
-        url: https://github.com/dhruvvyas90/qemu-rpi-kernel/raw/master/kernel-qemu-4.14.50-stretch
+        url: https://github.com/dhruvvyas90/qemu-rpi-kernel/raw/master/kernel-qemu-4.14.79-stretch
         dest: /var/raspi/
         owner: '{{sshd_user}}'
         group: '{{sshd_user}}'
