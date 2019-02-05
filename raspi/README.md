@@ -231,6 +231,7 @@ $ sudo raspi-config
 
 - 4 Localisation Options
   - I1 Change Locale
+    - en_US.UTF-8 (default)
     - ja_JP.UTF-8
   - I2 Change Timezone
     - Asia/Tokyo
