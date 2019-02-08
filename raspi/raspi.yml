@@ -106,6 +106,7 @@
         - zip
         - p7zip-full
         - parted
+        - nginx
     # Setting git
     - name: Copy git config
       template:
