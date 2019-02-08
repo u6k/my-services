@@ -149,7 +149,7 @@
 
           [Service]
           Type=simple
-          ExecStart=/opt/minio/minio server --config-dir /mnt/data/minio/config --address ":80" /mnt/data/minio/data
+          ExecStart=/opt/minio/minio server --config-dir /mnt/data/minio/config /mnt/data/minio/data
           Restart=on-abort
           WorkingDirectory=/opt/minio
 
