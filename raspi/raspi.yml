@@ -121,3 +121,43 @@
       with_items:
         - '  name = {{git_user_name}}'
         - '  email = {{git_user_email}}'
+    # Setup Minio
+    - name: Create Minio directory
+      file:
+        path: /opt/minio
+        state: directory
+    - name: Create Minio data directory
+      file:
+        path: /mnt/data/minio/data
+        state: directory
+    - name: Create Minio config directory
+      file:
+        path: /mnt/data/minio/config
+        state: directory
+    - name: Download Minio binary
+      get_url:
+        url: https://dl.minio.io/server/minio/release/linux-arm/minio
+        dest: /opt/minio/
+        mode: u+x
+    - name: Create Systemd minio service file
+      copy:
+        dest: /etc/systemd/system/minio.service
+        content: |
+          [Unit]
+          Description=Minio service
+          After=network.target
+
+          [Service]
+          Type=simple
+          ExecStart=/opt/minio/minio server --config-dir /mnt/data/minio/config --address ":80" /mnt/data/minio/data
+          Restart=on-abort
+          WorkingDirectory=/opt/minio
+
+          [Install]
+          WantedBy=multi-user.target
+    - name: Enable minio service
+      systemd:
+        name: minio
+        daemon_reload: yes
+        enabled: yes
+        state: restarted
