@@ -170,6 +170,21 @@
         regexp: 'listen \[::\]:80 default_server;'
         line: '#listen [::]:80 default_server;'
         backup: yes
+    - name: Create minio reverse proxy config in nginx sites-enabled
+      copy:
+        dest: /etc/nginx/sites-enabled/minio
+        content: |
+          server {
+            listen 80;
+            server_name s3.127.0.0.1.xip.io;
+            ignore_invalid_headers off;
+            client_max_body_size 0;
+            proxy_buffering off;
+            location / {
+              proxy_set_header Host $http_host;
+              proxy_pass http://localhost:9000;
+            }
+          }
     - name: Restart nginx service
       systemd:
         name: nginx
