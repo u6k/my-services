@@ -168,7 +168,7 @@
       lineinfile:
         dest: /etc/nginx/sites-available/default
         regexp: 'listen \[::\]:80 default_server;'
-        line: 'listen [::]:80 default_server;'
+        line: '#listen [::]:80 default_server;'
         backup: yes
     - name: Restart nginx service
       systemd:
