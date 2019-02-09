@@ -162,10 +162,8 @@
         enabled: yes
         state: restarted
     - name: Install nginx
-      apt:
-        name: nginx
-        update_cache: yes
-        failed_when: False
+      apt: name=nginx update_cache=true
+      ignore_errors: yes
     - name: Modify nginx config
       lineinfile:
         dest: /etc/nginx/sites-available/default
