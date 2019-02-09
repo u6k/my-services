@@ -59,7 +59,7 @@ apt update && apt -y upgrade && apt -y install git ansible python-apt
 当リポジトリをダウンロードします。
 
 ```
-git clone git@github.com:u6k/my-services.git
+git clone https://github.com/u6k/my-services.git
 ```
 
 ### Ansible Playbookを実行準備
@@ -275,7 +275,7 @@ Raspbian仮想マシンをセットアップするために、Ansible Playbook�
 改めて、`my-services`リポジトリをダウンロードします。
 
 ```
-git clone git@github.com:u6k/my-services.git
+git clone https://github.com/u6k/my-services.git
 ```
 
 公開鍵を`id_rsa.pub`ファイルとして作成します。
