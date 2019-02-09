@@ -106,7 +106,6 @@
         - zip
         - p7zip-full
         - parted
-        - nginx
     # Setting git
     - name: Copy git config
       template:
@@ -161,4 +160,19 @@
         name: minio
         daemon_reload: yes
         enabled: yes
+        state: restarted
+    - name: Install nginx
+      apt:
+        name: nginx
+        update_cache: yes
+        failed_when: False
+    - name: Modify nginx config
+      lineinfile:
+        dest: /etc/nginx/sites-available/default
+        regexp: 'listen \[::\]:80 default_server;'
+        line: 'listen [::]:80 default_server;'
+        backup: yes
+    - name: Restart nginx service
+      systemd:
+        name: nginx
         state: restarted
