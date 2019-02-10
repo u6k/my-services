@@ -166,7 +166,7 @@ $ sudo halt
 ```
 
 ```
-$ ./start-raspi.sh
+$ sudo ./start-raspi.sh
 ```
 
 ファイルシステムのリサイズします。
