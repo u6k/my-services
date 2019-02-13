@@ -5,7 +5,7 @@
     - settings.yml
   tasks:
     # Setting sudo
-    - name: Add Wheel group
+    - name: Add wheel group
       group:
         name: wheel
     - name: Allow wheel group to have passwordless sudo
@@ -14,13 +14,13 @@
         regexp: '^%wheel'
         line: '%wheel ALL=(ALL) NOPASSWD: ALL'
         validate: 'visudo -cf %s'
-    # Setting User
-    - name: Add User
+    # Setting user
+    - name: Add user
       user:
         name: '{{sshd_user}}'
         groups: wheel
         shell: /bin/bash
-    - name: mkdir .ssh
+    - name: Create .ssh directory
       file:
         dest: '/home/{{sshd_user}}/.ssh/'
         state: directory
@@ -35,9 +35,9 @@
         group: '{{sshd_user}}'
         mode: 0600
     - name: Copy public key
-      template:
-        src: 'id_rsa.pub'
+      copy:
         dest: '/home/{{sshd_user}}/.ssh/authorized_keys'
+        content: '{{sshd_public_key}}'
     - name: Disable pi user
       user:
         name: pi
@@ -106,6 +106,7 @@
         - zip
         - p7zip-full
         - parted
+        - curl
     # Setting git
     - name: Copy git config
       template:
@@ -161,6 +162,7 @@
         daemon_reload: yes
         enabled: yes
         state: restarted
+    # Setup nginx reverse proxy
     - name: Install nginx
       apt: name=nginx update_cache=true
       ignore_errors: yes
@@ -170,15 +172,38 @@
         regexp: 'listen \[::\]:80 default_server;'
         line: '#listen [::]:80 default_server;'
         backup: yes
-    - name: Create minio reverse proxy config in nginx sites-enabled
+    - name: Create minio reverse proxy config (http)
       copy:
-        dest: /etc/nginx/sites-enabled/minio
+        dest: /etc/nginx/sites-available/minio-http
         content: |
           server {
             listen 80;
-            server_name "~^s3\.(\d+\.){4}xip\.io$";
             server_name s3.u6k.me;
-            ignore_invalid_headers off;
+            location ^~ /.well-known/acme-challenge/ {
+              default_type "text/plain";
+              root /var/www/s3.u6k.me/;
+            }
+            location / {
+              return 301 https://$host$request_uri;
+            }
+          }
+    - name: Create minio reverse proxy config (http) link
+      file:
+        src: /etc/nginx/sites-available/minio-http
+        dest: /etc/nginx/sites-enabled/minio-http
+        state: link
+    - name: Create minio reverse proxy config (https)
+      copy:
+        dest: /etc/nginx/sites-available/minio-https
+        content: |
+          server {
+            listen 443 ssl;
+            server_name s3.u6k.me;
+            ssl_certificate /etc/letsencrypt/live/s3.u6k.me/fullchain.pem;
+            ssl_certificate_key /etc/letsencrypt/live/s3.u6k.me/privkey.pem;
+            ssl_prefer_server_ciphers on;
+            ssl_ciphers 'ECDH !aNULL !eNULL !SSLv2 !SSLv3';
+            add_header Strict-Transport-Security "max-age=31536000; includeSubdomains";  ignore_invalid_headers off;
             client_max_body_size 0;
             proxy_buffering off;
             location / {
@@ -188,6 +213,22 @@
             }
           }
     - name: Restart nginx service
-      systemd:
+      service:
         name: nginx
         state: restarted
+    # Setup certbot
+    - name: Clone certbot
+      git:
+        repo: "https://github.com/certbot/certbot"
+        dest: /usr/local/src/certbot/
+    - name: Create certbot-auto link
+      file:
+        src: /usr/local/src/certbot/certbot-auto
+        dest: /usr/local/bin/certbot-auto
+        state: link
+    - name: Create s3.u6k.me certificate directory
+      file:
+        dest: '/var/www/s3.u6k.me/'
+        state: directory
+    - name: Resolve certbot dependency packages
+      shell: certbot-auto --version -n

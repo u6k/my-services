@@ -35,9 +35,9 @@
         group: '{{sshd_user}}'
         mode: 0600
     - name: Copy public key
-      template:
-        src: 'id_rsa.pub'
+      copy:
         dest: '/home/{{sshd_user}}/.ssh/authorized_keys'
+        content: '{{sshd_public_key}}'
     # Setting SSH
     - name: Setting SSH
       lineinfile:
@@ -101,6 +101,7 @@
         - qemu
         - unzip
         - sshpass
+        - curl
     # Setting git
     - name: Copy git config
       template:
@@ -179,5 +180,5 @@
             -hda 2018-11-13-raspbian-stretch-lite.img \
             -hdb temp.img \
             -net nic \
-            -net user,hostfwd=tcp::10022-:22,hostfwd=tcp::10080-:80,hostfwd=tcp::10443-:443 \
+            -net user,hostfwd=tcp::10022-:22,hostfwd=tcp::80-:80,hostfwd=tcp::443-:443 \
             -curses
