@@ -5,7 +5,7 @@
     - settings.yml
   tasks:
     # Setting sudo
-    - name: Add Wheel group
+    - name: Add wheel group
       group:
         name: wheel
     - name: Allow wheel group to have passwordless sudo
@@ -14,13 +14,13 @@
         regexp: '^%wheel'
         line: '%wheel ALL=(ALL) NOPASSWD: ALL'
         validate: 'visudo -cf %s'
-    # Setting User
-    - name: Add User
+    # Setting user
+    - name: Add user
       user:
         name: '{{sshd_user}}'
         groups: wheel
         shell: /bin/bash
-    - name: mkdir .ssh
+    - name: Mkdir .ssh
       file:
         dest: '/home/{{sshd_user}}/.ssh/'
         state: directory
@@ -216,7 +216,7 @@
           #  }
           #}
     - name: Restart nginx service
-      systemd:
+      service:
         name: nginx
         state: restarted
     # Setup certbot
@@ -229,3 +229,5 @@
         src: /usr/local/src/certbot/certbot-auto
         dest: /usr/local/bin/certbot-auto
         state: link
+    - name: Resolve certbot dependency packages
+      shell: certbot -v -n
