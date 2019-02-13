@@ -288,7 +288,13 @@ $ certbot-auto renew
 
 ### HTTPSでminioサービスを公開
 
-`/etc/nginx/sites-enabled/minio`に、minioサービスをHTTPSで公開するための設定がコメントアウトされているので、コメントインします。その後、nginxサービスをリロードして、設定を反映します。
+`/etc/nginx/sites-available/minio-https`に、minioサービスをHTTPSで公開するための設定が記述されているので、これを有効かします。
+
+```
+$ sudo ln -s /etc/nginx/sites-available/minio-https /etc/nginx/sites-enabled/minio-https
+```
+
+その後、nginxサービスをリロードして、設定を反映します。
 
 ```
 $ sudo systemctl reload nginx
