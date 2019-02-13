@@ -101,6 +101,7 @@
         - qemu
         - unzip
         - sshpass
+        - curl
     # Setting git
     - name: Copy git config
       template:
