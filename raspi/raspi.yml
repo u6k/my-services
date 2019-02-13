@@ -230,4 +230,4 @@
         dest: /usr/local/bin/certbot-auto
         state: link
     - name: Resolve certbot dependency packages
-      shell: certbot -v -n
+      shell: certbot-auto -v -n
