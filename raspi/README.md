@@ -226,9 +226,8 @@ $ sudo raspi-config
   - P2 SSH
 - 6 Overclock
   - Turbo
-- 8 Update
 
-> __NOTE:__ ロケール、タイムゾーンは後でAnsibleで設定します。
+> __NOTE:__ ロケール、タイムゾーンは後でAnsibleで設定します。`raspi-config`の更新は、後で`apt upgrade`で行います。
 
 これで、Raspbian仮想マシンのsshが有効化されます。試しに、DropletからRaspbian仮想マシンにssh接続してみます。
 
