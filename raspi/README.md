@@ -266,6 +266,36 @@ $ cp 2018-11-13-raspbian-stretch-lite.img 2018-11-13-raspbian-stretch-lite.img.b
 
 Raspbian仮想マシンをセットアップするために、Ansible Playbookを実行します。実行手順は、DebianにAnsible Playbookを実行した時と同様です。Playbookは `raspi.yml` を使います。
 
+### サーバー証明書を生成
+
+`raspi.yml`を実行すると、次のようにセットアップされます。
+
+- minioサービス
+- nginxによるリバース・プロキシ
+- certbot-auto
+
+minioサービスをHTTPSで公開するため、サーバー証明書を生成します。次のコマンドを実行して、質問に回答します。
+
+```
+$ certbot-auto certonly --webroot -w /var/www/s3.u6k.me -d s3.u6k.me
+```
+
+生成されたサーバー証明書の有効期限は3か月間なので、定期的に次のコマンドを実行してサーバー証明書を更新します。
+
+```
+$ certbot-auto renew
+```
+
+### HTTPSでminioサービスを公開
+
+`/etc/nginx/sites-enabled/minio`に、minioサービスをHTTPSで公開するための設定がコメントアウトされているので、コメントインします。その後、nginxサービスをリロードして、設定を反映します。
+
+```
+$ sudo systemctl reload nginx
+```
+
+https://s3.u6k.me にブラウザや`aws-cli`からアクセスできることを確認します。
+
 ## Maintainer
 
 - u6k
