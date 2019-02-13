@@ -231,4 +231,4 @@
         dest: '/var/www/s3.u6k.me/'
         state: directory
     - name: Resolve certbot dependency packages
-      shell: certbot-auto -v -n
+      shell: certbot-auto --version -n
