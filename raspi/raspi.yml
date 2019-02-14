@@ -51,22 +51,34 @@
         line: '{{item.line}}'
         backup: true
       with_items:
-          - { regexp: '^RhostsRSAAuthentication', insertafter: '^#RhostsRSAAuthentication', line: 'RhostsRSAAuthentication no' }
-          - { regexp: '^HostbasedAuthentication', insertafter: '^#HostbasedAuthentication', line: 'HostbasedAuthentication no' }
-          - { regexp: '^IgnoreRhosts', insertafter: '^#IgnoreRhosts', line: 'IgnoreRhosts yes' }
-          - { regexp: '^PubkeyAuthentication', insertafter: '^#PubkeyAuthentication', line: 'PubkeyAuthentication yes' }
-          - { regexp: '^AuthorizedKeysFile', insertafter: '^#AuthorizedKeysFile', line: 'AuthorizedKeysFile .ssh/authorized_keys' }
-          - { regexp: '^PasswordAuthentication', insertafter: '^#PasswordAuthentication', line: 'PasswordAuthentication no' }
-          - { regexp: '^PermitEmptyPasswords', insertafter: '^#PermitEmptyPasswords', line: 'PermitEmptyPasswords no' }
-          - { regexp: '^ChallengeResponseAuthentication', insertafter: '^#ChallengeResponseAuthentication', line: 'ChallengeResponseAuthentication no' }
-          - { regexp: '^PermitRootLogin', insertafter: '^#PermitRootLogin', line: 'PermitRootLogin no' }
-          - { regexp: '^Port', insertafter: '^#Port', line: 'Port {{sshd_port}}' }
-          - { regexp: '^AllowUsers', insertafter: '^#AllowUsers', line: 'AllowUsers {{sshd_user}}' }
-          - { regexp: '^Protocol', insertafter: '^#Protocol', line: 'Protocol 2' }
+        - { regexp: '^RhostsRSAAuthentication', insertafter: '^#RhostsRSAAuthentication', line: 'RhostsRSAAuthentication no' }
+        - { regexp: '^HostbasedAuthentication', insertafter: '^#HostbasedAuthentication', line: 'HostbasedAuthentication no' }
+        - { regexp: '^IgnoreRhosts', insertafter: '^#IgnoreRhosts', line: 'IgnoreRhosts yes' }
+        - { regexp: '^PubkeyAuthentication', insertafter: '^#PubkeyAuthentication', line: 'PubkeyAuthentication yes' }
+        - { regexp: '^AuthorizedKeysFile', insertafter: '^#AuthorizedKeysFile', line: 'AuthorizedKeysFile .ssh/authorized_keys' }
+        - { regexp: '^PasswordAuthentication', insertafter: '^#PasswordAuthentication', line: 'PasswordAuthentication no' }
+        - { regexp: '^PermitEmptyPasswords', insertafter: '^#PermitEmptyPasswords', line: 'PermitEmptyPasswords no' }
+        - { regexp: '^ChallengeResponseAuthentication', insertafter: '^#ChallengeResponseAuthentication', line: 'ChallengeResponseAuthentication no' }
+        - { regexp: '^PermitRootLogin', insertafter: '^#PermitRootLogin', line: 'PermitRootLogin no' }
+        - { regexp: '^Port', insertafter: '^#Port', line: 'Port {{sshd_port}}' }
+        - { regexp: '^AllowUsers', insertafter: '^#AllowUsers', line: 'AllowUsers {{sshd_user}}' }
+        - { regexp: '^Protocol', insertafter: '^#Protocol', line: 'Protocol 2' }
     - name: Restart SSHd
       service:
         name: ssh
         state: restarted
+    # Setup locale
+    - name: Setting and generate locale
+      locale_gen: name='{{item}}'
+      with_items:
+        - 'ja_JP.UTF-8'
+        - 'en_US.UTF-8'
+    - name: Set default locale
+      shell: localectl set-locale LANG=en_US.UTF-8
+    # Setup timezone
+    - name: Setting timezone
+      timezone:
+        name: Asia/Tokyo
     # Setting NTP
     - name: Install NTP
       apt: name=ntp update_cache=yes
