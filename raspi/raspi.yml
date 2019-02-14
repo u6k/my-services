@@ -119,6 +119,17 @@
         - p7zip-full
         - parted
         - curl
+    # Setup firewall
+    - name: Setting ufw
+      ufw:
+        state: enabled
+        policy: deny
+        rule: allow
+        port: '{{item}}'
+      with_items:
+        - 80
+        - 443
+        - '{{sshd_port}}'
     # Setting git
     - name: Copy git config
       template:
