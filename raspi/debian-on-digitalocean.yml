@@ -102,6 +102,7 @@
         - unzip
         - sshpass
         - curl
+        - ufw
     # Setting git
     - name: Copy git config
       template:
@@ -117,6 +118,17 @@
       with_items:
         - '  name = {{git_user_name}}'
         - '  email = {{git_user_email}}'
+    # Setup firewall
+    - name: Setting ufw
+      ufw:
+        state: enabled
+        policy: deny
+        rule: allow
+        port: '{{item}}'
+      with_items:
+        - 80
+        - 443
+        - '{{sshd_port}}'
     # Setup Raspberry Pi simulator
     - name: Create raspi directory
       file:
