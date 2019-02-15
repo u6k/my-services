@@ -4,6 +4,19 @@
   vars_files:
     - settings.yml
   tasks:
+    # Setup journald
+    - name: Setting journald
+      lineinfile:
+        dest: /etc/systemd/journald.conf
+        regexp: '{{item.regexp}}'
+        line: '{{item.line}}'
+        backup: true
+      with_items:
+        - { regexp: '^#Storage', line: 'Storage=persistent' }
+    - name: Restart journald
+      service:
+        name: systemd-journald
+        state: restarted
     # Setting sudo
     - name: Add wheel group
       group:
