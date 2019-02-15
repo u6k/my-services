@@ -4,6 +4,11 @@
   vars_files:
     - settings.yml
   tasks:
+    # Setup journal log
+    - name: Create journal log directory
+      file:
+        dest: '/var/log/journal/'
+        state: directory
     # Setting sudo
     - name: Add wheel group
       group:
