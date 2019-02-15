@@ -255,3 +255,50 @@
         state: directory
     - name: Resolve certbot dependency packages
       shell: certbot-auto --version -n
+    # Setup mydns updator
+    - name: Create mydns environment file
+      copy:
+        dest: /etc/profile.d/mydns.sh
+        content: |
+          MYDNS_USER={{mydns_user}}
+          MYDNS_PASS={{mydns_pass}}
+    - name: Create systemd mydns service file
+      copy:
+        dest: /etc/systemd/system/mydns.service
+        content: |
+          [Unit]
+          Description=Update mydns ip address
+
+          [Service]
+          Type=simple
+          EnvironmentFile=/etc/profile.d/mydns.sh
+          ExecStart=/usr/bin/curl -v http://${MYDNS_USER}:${MYDNS_PASS}@www.mydns.jp/login.html
+
+          [Install]
+          WantedBy=multi-user.target
+    - name: Create systemd mydns timer file
+      copy:
+        dest: /etc/systemd/system/mydns.timer
+        content: |
+          [Unit]
+          Description=Run mydns.service
+
+          [Timer]
+          OnCalendar=hourly
+          Persistent=true
+
+          [Install]
+          WantedBy=timers.target
+          pi@raspberr
+    - name: Enable mydns service
+      systemd:
+        name: mydns.service
+        daemon_reload: yes
+        enabled: yes
+        state: restarted
+    - name: Enable mydns timer
+      systemd:
+        name: mydns.timer
+        daemon_reload: yes
+        enabled: yes
+        state: restarted
