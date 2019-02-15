@@ -289,7 +289,6 @@
 
           [Install]
           WantedBy=timers.target
-          pi@raspberr
     - name: Enable mydns service
       systemd:
         name: mydns.service
