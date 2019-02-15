@@ -268,6 +268,7 @@ Raspbian仮想マシンをセットアップするために、Ansible Playbook�
 - minioサービス
 - nginxによるリバース・プロキシ
 - certbot-auto
+- MyDNSのIPアドレスの定期更新
 
 minioサービスをHTTPSで公開するため、サーバー証明書を生成します。次のコマンドを実行して、質問に回答します。
 
