@@ -180,9 +180,8 @@
           [Install]
           WantedBy=multi-user.target
     - name: Enable minio service
-      systemd:
-        name: minio
-        daemon_reload: yes
+      service:
+        name: minio.service
         enabled: yes
         state: restarted
     # Setup nginx reverse proxy
@@ -290,14 +289,12 @@
           [Install]
           WantedBy=timers.target
     - name: Enable mydns service
-      systemd:
+      service:
         name: mydns.service
-        daemon_reload: yes
         enabled: yes
         state: restarted
     - name: Enable mydns timer
-      systemd:
+      service:
         name: mydns.timer
-        daemon_reload: yes
         enabled: yes
         state: restarted
