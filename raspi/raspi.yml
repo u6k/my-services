@@ -4,8 +4,30 @@
   vars_files:
     - settings.yml
   tasks:
+    # Setup journald
+    - name: Setting journald
+      lineinfile:
+        dest: /etc/systemd/journald.conf
+        regexp: '{{item.regexp}}'
+        line: '{{item.line}}'
+        backup: true
+      with_items:
+        - { regexp: '^#Storage', line: 'Storage=persistent' }
+    - name: Restart journald
+      service:
+        name: systemd-journald
+        state: restarted
+    # Disable IPv6
+    - name: Create disable ipv6 sysctl config
+      copy:
+        dest: /etc/sysctl.d/disable-ipv6.conf
+        content: |
+          net.ipv6.conf.all.disable_ipv6 = 1
+          net.ipv6.conf.default.disable_ipv6 = 1
+    - name: Disable ipv6
+      shell: sysctl --system
     # Setting sudo
-    - name: Add Wheel group
+    - name: Add wheel group
       group:
         name: wheel
     - name: Allow wheel group to have passwordless sudo
@@ -14,13 +36,13 @@
         regexp: '^%wheel'
         line: '%wheel ALL=(ALL) NOPASSWD: ALL'
         validate: 'visudo -cf %s'
-    # Setting User
-    - name: Add User
+    # Setting user
+    - name: Add user
       user:
         name: '{{sshd_user}}'
         groups: wheel
         shell: /bin/bash
-    - name: mkdir .ssh
+    - name: Create .ssh directory
       file:
         dest: '/home/{{sshd_user}}/.ssh/'
         state: directory
@@ -35,9 +57,9 @@
         group: '{{sshd_user}}'
         mode: 0600
     - name: Copy public key
-      template:
-        src: 'id_rsa.pub'
+      copy:
         dest: '/home/{{sshd_user}}/.ssh/authorized_keys'
+        content: '{{sshd_public_key}}'
     - name: Disable pi user
       user:
         name: pi
@@ -51,22 +73,34 @@
         line: '{{item.line}}'
         backup: true
       with_items:
-          - { regexp: '^RhostsRSAAuthentication', insertafter: '^#RhostsRSAAuthentication', line: 'RhostsRSAAuthentication no' }
-          - { regexp: '^HostbasedAuthentication', insertafter: '^#HostbasedAuthentication', line: 'HostbasedAuthentication no' }
-          - { regexp: '^IgnoreRhosts', insertafter: '^#IgnoreRhosts', line: 'IgnoreRhosts yes' }
-          - { regexp: '^PubkeyAuthentication', insertafter: '^#PubkeyAuthentication', line: 'PubkeyAuthentication yes' }
-          - { regexp: '^AuthorizedKeysFile', insertafter: '^#AuthorizedKeysFile', line: 'AuthorizedKeysFile .ssh/authorized_keys' }
-          - { regexp: '^PasswordAuthentication', insertafter: '^#PasswordAuthentication', line: 'PasswordAuthentication no' }
-          - { regexp: '^PermitEmptyPasswords', insertafter: '^#PermitEmptyPasswords', line: 'PermitEmptyPasswords no' }
-          - { regexp: '^ChallengeResponseAuthentication', insertafter: '^#ChallengeResponseAuthentication', line: 'ChallengeResponseAuthentication no' }
-          - { regexp: '^PermitRootLogin', insertafter: '^#PermitRootLogin', line: 'PermitRootLogin no' }
-          - { regexp: '^Port', insertafter: '^#Port', line: 'Port {{sshd_port}}' }
-          - { regexp: '^AllowUsers', insertafter: '^#AllowUsers', line: 'AllowUsers {{sshd_user}}' }
-          - { regexp: '^Protocol', insertafter: '^#Protocol', line: 'Protocol 2' }
+        - { regexp: '^RhostsRSAAuthentication', insertafter: '^#RhostsRSAAuthentication', line: 'RhostsRSAAuthentication no' }
+        - { regexp: '^HostbasedAuthentication', insertafter: '^#HostbasedAuthentication', line: 'HostbasedAuthentication no' }
+        - { regexp: '^IgnoreRhosts', insertafter: '^#IgnoreRhosts', line: 'IgnoreRhosts yes' }
+        - { regexp: '^PubkeyAuthentication', insertafter: '^#PubkeyAuthentication', line: 'PubkeyAuthentication yes' }
+        - { regexp: '^AuthorizedKeysFile', insertafter: '^#AuthorizedKeysFile', line: 'AuthorizedKeysFile .ssh/authorized_keys' }
+        - { regexp: '^PasswordAuthentication', insertafter: '^#PasswordAuthentication', line: 'PasswordAuthentication no' }
+        - { regexp: '^PermitEmptyPasswords', insertafter: '^#PermitEmptyPasswords', line: 'PermitEmptyPasswords no' }
+        - { regexp: '^ChallengeResponseAuthentication', insertafter: '^#ChallengeResponseAuthentication', line: 'ChallengeResponseAuthentication no' }
+        - { regexp: '^PermitRootLogin', insertafter: '^#PermitRootLogin', line: 'PermitRootLogin no' }
+        - { regexp: '^Port', insertafter: '^#Port', line: 'Port {{sshd_port}}' }
+        - { regexp: '^AllowUsers', insertafter: '^#AllowUsers', line: 'AllowUsers {{sshd_user}}' }
+        - { regexp: '^Protocol', insertafter: '^#Protocol', line: 'Protocol 2' }
     - name: Restart SSHd
       service:
         name: ssh
         state: restarted
+    # Setup locale
+    - name: Setting and generate locale
+      locale_gen: name='{{item}}'
+      with_items:
+        - 'ja_JP.UTF-8'
+        - 'en_US.UTF-8'
+    - name: Set default locale
+      shell: localectl set-locale LANG=en_US.UTF-8
+    # Setup timezone
+    - name: Setting timezone
+      timezone:
+        name: Asia/Tokyo
     # Setting NTP
     - name: Install NTP
       apt: name=ntp update_cache=yes
@@ -106,6 +140,18 @@
         - zip
         - p7zip-full
         - parted
+        - curl
+    # Setup firewall
+    - name: Setting ufw
+      ufw:
+        state: enabled
+        policy: deny
+        rule: allow
+        port: '{{item}}'
+      with_items:
+        - 80
+        - 443
+        - '{{sshd_port}}'
     # Setting git
     - name: Copy git config
       template:
@@ -121,3 +167,156 @@
       with_items:
         - '  name = {{git_user_name}}'
         - '  email = {{git_user_email}}'
+    # Setup Minio
+    - name: Create Minio directory
+      file:
+        path: /opt/minio
+        state: directory
+    - name: Create Minio data directory
+      file:
+        path: /mnt/data/minio/data
+        state: directory
+    - name: Create Minio config directory
+      file:
+        path: /mnt/data/minio/config
+        state: directory
+    - name: Download Minio binary
+      get_url:
+        url: https://dl.minio.io/server/minio/release/linux-arm/minio
+        dest: /opt/minio/
+        mode: u+x
+    - name: Create Systemd minio service file
+      copy:
+        dest: /etc/systemd/system/minio.service
+        content: |
+          [Unit]
+          Description=Minio service
+          After=network.target
+
+          [Service]
+          Type=simple
+          ExecStart=/opt/minio/minio server --config-dir /mnt/data/minio/config /mnt/data/minio/data
+          Restart=on-abort
+          WorkingDirectory=/opt/minio
+
+          [Install]
+          WantedBy=multi-user.target
+    - name: Enable minio service
+      service:
+        name: minio.service
+        enabled: yes
+        state: restarted
+    # Setup nginx reverse proxy
+    - name: Install nginx
+      apt: name=nginx update_cache=true
+      ignore_errors: yes
+    - name: Modify nginx config
+      lineinfile:
+        dest: /etc/nginx/sites-available/default
+        regexp: 'listen \[::\]:80 default_server;'
+        line: '#listen [::]:80 default_server;'
+        backup: yes
+    - name: Create minio reverse proxy config (http)
+      copy:
+        dest: /etc/nginx/sites-available/minio-http
+        content: |
+          server {
+            listen 80;
+            server_name s3.u6k.me;
+            location ^~ /.well-known/acme-challenge/ {
+              default_type "text/plain";
+              root /var/www/s3.u6k.me/;
+            }
+            location / {
+              return 301 https://$host$request_uri;
+            }
+          }
+    - name: Create minio reverse proxy config (http) link
+      file:
+        src: /etc/nginx/sites-available/minio-http
+        dest: /etc/nginx/sites-enabled/minio-http
+        state: link
+    - name: Create minio reverse proxy config (https)
+      copy:
+        dest: /etc/nginx/sites-available/minio-https
+        content: |
+          server {
+            listen 443 ssl;
+            server_name s3.u6k.me;
+            ssl_certificate /etc/letsencrypt/live/s3.u6k.me/fullchain.pem;
+            ssl_certificate_key /etc/letsencrypt/live/s3.u6k.me/privkey.pem;
+            ssl_prefer_server_ciphers on;
+            ssl_ciphers 'ECDH !aNULL !eNULL !SSLv2 !SSLv3';
+            add_header Strict-Transport-Security "max-age=31536000; includeSubdomains";  ignore_invalid_headers off;
+            client_max_body_size 0;
+            proxy_buffering off;
+            location / {
+              proxy_set_header Host $http_host;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_pass http://localhost:9000;
+            }
+          }
+    - name: Restart nginx service
+      service:
+        name: nginx
+        state: restarted
+    # Setup certbot
+    - name: Clone certbot
+      git:
+        repo: "https://github.com/certbot/certbot"
+        dest: /usr/local/src/certbot/
+    - name: Create certbot-auto link
+      file:
+        src: /usr/local/src/certbot/certbot-auto
+        dest: /usr/local/bin/certbot-auto
+        state: link
+    - name: Create s3.u6k.me certificate directory
+      file:
+        dest: '/var/www/s3.u6k.me/'
+        state: directory
+    - name: Resolve certbot dependency packages
+      shell: certbot-auto --version -n
+    # Setup mydns updator
+    - name: Create mydns environment file
+      copy:
+        dest: /etc/profile.d/mydns.sh
+        content: |
+          MYDNS_USER={{mydns_user}}
+          MYDNS_PASS={{mydns_pass}}
+    - name: Create systemd mydns service file
+      copy:
+        dest: /etc/systemd/system/mydns.service
+        content: |
+          [Unit]
+          Description=Update mydns ip address
+
+          [Service]
+          Type=simple
+          EnvironmentFile=/etc/profile.d/mydns.sh
+          ExecStart=/usr/bin/curl -v http://${MYDNS_USER}:${MYDNS_PASS}@www.mydns.jp/login.html
+
+          [Install]
+          WantedBy=multi-user.target
+    - name: Create systemd mydns timer file
+      copy:
+        dest: /etc/systemd/system/mydns.timer
+        content: |
+          [Unit]
+          Description=Run mydns.service
+
+          [Timer]
+          OnCalendar=hourly
+          Persistent=true
+
+          [Install]
+          WantedBy=timers.target
+    - name: Enable mydns service
+      service:
+        name: mydns.service
+        enabled: yes
+        state: restarted
+    - name: Enable mydns timer
+      service:
+        name: mydns.timer
+        enabled: yes
+        state: restarted

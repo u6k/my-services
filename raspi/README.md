@@ -25,7 +25,7 @@ Raspbian Stretch LiteをインストールしたRaspberry Piに変更を行う�
 - SSH
   - ポート: 10022 (変更可能)
   - ユーザー: foo (変更可能)
-  - 認証方式: 鍵認証 (公開鍵を要配置)
+  - 認証方式: 鍵認証 (変更可能)
 - git
   - git設定: `~/.gitconfig`を参照
   - gitユーザー: foo (変更可能)
@@ -49,8 +49,7 @@ Dropletを作成したら、`root`でsshログインします。
 Ansible Playbookを実行するために、最低限のソフトウェアをインストールします。
 
 ```
-apt update && apt -y upgrade
-apt -y install git ansible python-apt
+apt update && apt -y upgrade && apt -y install git ansible python-apt
 ```
 
 他に必要なソフトウェアがあれば、Ansible Playbookに追加するとよいです。
@@ -60,28 +59,22 @@ apt -y install git ansible python-apt
 当リポジトリをダウンロードします。
 
 ```
-git clone git@github.com:u6k/my-services.git
+git clone https://github.com/u6k/my-services.git
 ```
 
 ### Ansible Playbookを実行準備
 
-Ansible Playbookを実行する前に、各種設定を行います。
-
-現在は`root`で作業していますが、Ansible Playbookによって作業ユーザーが作成されるので、作業ユーザーの公開鍵を`id_rsa.pub`ファイルとして作成します。
-
-`settings.yml.example`を参考に、`settings.yml`を作成します。このファイルには、[この手順によって構築される環境](#この手順によって構築される環境)で「変更可能」とした設定を記述します。
+Ansible Playbookを実行する前に、各種設定を行います。`settings.yml.example`を参考に、`settings.yml`を作成します。このファイルには、[この手順によって構築される環境](#この手順によって構築される環境)で「変更可能」とした設定を記述します。
 
 ### Ansible Playbookを実行
 
 いよいよ、Ansible Playbookを実行します。
 
 ```
-ansible-playbook debian-on-digitalocean.yml -i hosts
+ansible-playbook debian-on-digitalocean.yml -i localhost, -c local
 ```
 
-問題なく終了したら、まずはsshログイン確認を行います。万が一、ssh設定が失敗していた場合、ログインすらできなくなってしまうので。
-
-別のsshクライアントを起動して、`settings.yml`に設定したsshユーザーでログインを試みてください。
+問題なく終了したら、まずはsshログイン確認を行います。万が一、ssh設定が失敗していた場合、ログインすらできなくなってしまうので。別のsshクライアントを起動して、`settings.yml`に設定したsshユーザーでログインを試みてください。
 
 ## Usage
 
@@ -91,7 +84,7 @@ Raspbian Stretch Lite仮想マシンを起動するには、次のコマンド�
 
 ```
 cd /var/raspi/
-./start-raspi.sh
+sudo ./start-raspi.sh
 ```
 
 これだけで一応は使用可能ですが、いくつかの手順を実行すべきです。
@@ -173,7 +166,7 @@ $ sudo halt
 ```
 
 ```
-$ ./start-raspi.sh
+$ sudo ./start-raspi.sh
 ```
 
 ファイルシステムのリサイズします。
@@ -229,16 +222,12 @@ $ sudo raspi-config
 
 次の項目を変更すればよいです。
 
-- 4 Localisation Options
-  - I1 Change Locale
-    - ja_JP.UTF-8
-  - I2 Change Timezone
-    - Asia/Tokyo
 - 5 Interfacing Options
   - P2 SSH
 - 6 Overclock
   - Turbo
-- 8 Update
+
+> __NOTE:__ ロケール、タイムゾーンは後でAnsibleで設定します。`raspi-config`の更新は、後で`apt upgrade`で行います。
 
 これで、Raspbian仮想マシンのsshが有効化されます。試しに、DropletからRaspbian仮想マシンにssh接続してみます。
 
@@ -270,27 +259,44 @@ $ cp 2018-11-13-raspbian-stretch-lite.img 2018-11-13-raspbian-stretch-lite.img.b
 
 ### Ansible PlaybookをRaspbian仮想マシンに実行
 
-Raspbian仮想マシンをセットアップするために、Ansible Playbookを実行します。実行手順は、DropletにAnsible Playbookを実行した時と同様です。念のため、次に簡単に説明します。
+Raspbian仮想マシンをセットアップするために、Ansible Playbookを実行します。実行手順は、DebianにAnsible Playbookを実行した時と同様です。Playbookは `raspi.yml` を使います。
 
-改めて、`my-services`リポジトリをダウンロードします。
+### サーバー証明書を生成
 
-```
-git clone git@github.com:u6k/my-services.git
-```
+`raspi.yml`を実行すると、次のようにセットアップされます。
 
-公開鍵を`id_rsa.pub`ファイルとして作成します。
+- minioサービス
+- nginxによるリバース・プロキシ
+- certbot-auto
+- MyDNSのIPアドレスの定期更新
 
-`settings.yml.example`を参考に、`settings.yml`を作成します。
-
-`hosts`ファイルに記載されている`localhost:22`を`localhost:10022`に変更します。これは、Raspbian仮想マシンのsshポートが`10022`だからです。
-
-Ansible Playbookを実行します。
+minioサービスをHTTPSで公開するため、サーバー証明書を生成します。次のコマンドを実行して、質問に回答します。
 
 ```
-ansible-playbook raspi.yml -i hosts --ask-pass
+$ certbot-auto certonly --webroot -w /var/www/s3.u6k.me -d s3.u6k.me
 ```
 
-Raspbian仮想マシンには`pi`ユーザーでsshログインを行いますが、その時のパスワードを指定するために`--ask-pass`オプションを指定します。
+生成されたサーバー証明書の有効期限は3か月間なので、定期的に次のコマンドを実行してサーバー証明書を更新します。
+
+```
+$ certbot-auto renew
+```
+
+### HTTPSでminioサービスを公開
+
+`/etc/nginx/sites-available/minio-https`に、minioサービスをHTTPSで公開するための設定が記述されているので、これを有効かします。
+
+```
+$ sudo ln -s /etc/nginx/sites-available/minio-https /etc/nginx/sites-enabled/minio-https
+```
+
+その後、nginxサービスをリロードして、設定を反映します。
+
+```
+$ sudo systemctl reload nginx
+```
+
+https://s3.u6k.me にブラウザや`aws-cli`からアクセスできることを確認します。
 
 ## Maintainer
 

@@ -35,9 +35,9 @@
         group: '{{sshd_user}}'
         mode: 0600
     - name: Copy public key
-      template:
-        src: 'id_rsa.pub'
+      copy:
         dest: '/home/{{sshd_user}}/.ssh/authorized_keys'
+        content: '{{sshd_public_key}}'
     # Setting SSH
     - name: Setting SSH
       lineinfile:
@@ -101,6 +101,8 @@
         - qemu
         - unzip
         - sshpass
+        - curl
+        - ufw
     # Setting git
     - name: Copy git config
       template:
@@ -116,6 +118,17 @@
       with_items:
         - '  name = {{git_user_name}}'
         - '  email = {{git_user_email}}'
+    # Setup firewall
+    - name: Setting ufw
+      ufw:
+        state: enabled
+        policy: deny
+        rule: allow
+        port: '{{item}}'
+      with_items:
+        - 80
+        - 443
+        - '{{sshd_port}}'
     # Setup Raspberry Pi simulator
     - name: Create raspi directory
       file:
@@ -179,5 +192,5 @@
             -hda 2018-11-13-raspbian-stretch-lite.img \
             -hdb temp.img \
             -net nic \
-            -net user,hostfwd=tcp::10022-:22 \
+            -net user,hostfwd=tcp::10022-:22,hostfwd=tcp::80-:80,hostfwd=tcp::443-:443 \
             -curses
