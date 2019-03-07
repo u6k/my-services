@@ -320,3 +320,55 @@
         name: mydns.timer
         enabled: yes
         state: restarted
+    # Setup backup storage
+    - name: Create data directory
+      file:
+        dest: '/mnt/data/'
+        state: directory
+    - name: Create backup directory
+      file:
+        dest: '/mnt/backup/'
+        state: directory
+    - name: Create backup storage script
+      copy:
+        dest: /usr/local/bin/backup-storage
+        mode: u+x
+        content: |
+          #!/bin/sh
+          rsync -av \
+            --exclude='lost+found/' \
+            --exclude='movie.sod/' \
+            --exclude='movie.sod-hash/' \
+            /mnt/data/ /mnt/backup/
+    - name: Create backup storage service
+      copy:
+        dest: /etc/systemd/system/backup-storage.service
+        content: |
+          [Unit]
+          Description=Backup storage
+          [Service]
+          Type=oneshot
+          ExecStart=/usr/local/bin/backup-storage
+          [Install]
+          WantedBy=multi-user.target
+    - name: Create backup storage timer
+      copy:
+        dest: /etc/systemd/system/backup-storage.timer
+        content: |
+          [Unit]
+          Description=Run backup-storage service
+          [Timer]
+          OnCalendar=*-*-* 00:00:00
+          Persistent=true
+          [Install]
+          WantedBy=timers.target
+    - name: Enable backup-storage service
+      service:
+        name: backup-storage.service
+        enabled: yes
+        state: restarted
+    - name: Enable backup-storage timer
+      service:
+        name: backup-storage.timer
+        enabled: yes
+        state: restarted
