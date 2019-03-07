@@ -321,6 +321,14 @@
         enabled: yes
         state: restarted
     # Setup backup storage
+    - name: Create data directory
+      file:
+        dest: '/mnt/data/'
+        state: directory
+    - name: Create backup directory
+      file:
+        dest: '/mnt/backup/'
+        state: directory
     - name: Create backup storage script
       copy:
         dest: /usr/local/bin/backup-storage
