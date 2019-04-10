@@ -1,6 +1,5 @@
-- hosts: vagrants
+- hosts: localhost
   become: yes
-  user: vagrant
   vars_files:
     - settings.yml
   tasks:
@@ -35,9 +34,9 @@
         group: '{{sshd_user}}'
         mode: 0600
     - name: Copy public key
-      template:
-        src: 'id_rsa.pub'
+      copy:
         dest: '/home/{{sshd_user}}/.ssh/authorized_keys'
+        content: '{{sshd_public_key}}'
     # Setting SSH
     - name: Setting SSH
       lineinfile:
@@ -68,27 +67,18 @@
       timezone:
         name: Asia/Tokyo
     # Setting NTP
-    - name: Install NTP
-      apt: name=ntp update_cache=yes
-    - name: Setting NTP (1/2)
-      replace:
-        dest: /etc/ntp.conf
-        regexp: '^pool'
-        replace: '#pool'
-        backup: true
-    - name: Setting NTP (2/2)
-      lineinfile:
-        dest: /etc/ntp.conf
-        insertafter: '^#pool'
-        line: '{{item}}'
-        backup: true
-      with_items:
-        - 'server ntp2.ring.gr.jp'
-        - 'server ntp1.ring.gr.jp'
-        - 'server ntp0.ring.gr.jp'
-    - name: Restart NTPd
-      service:
+    - name: Purge ntp
+      apt:
         name: ntp
+        purge: true
+        state: absent
+    - name: Setting timesyncd
+      lineinfile:
+        dest: /etc/systemd/timesyncd.conf
+        line: 'NTP=ntp.ring.gr.jp'
+    - name: Restart timesyncd
+      service:
+        name: systemd-timesyncd.service
         state: restarted
     # Install Docker CE
     - name: PreInstall Docker (1/4)

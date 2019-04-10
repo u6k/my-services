@@ -102,27 +102,13 @@
       timezone:
         name: Asia/Tokyo
     # Setting NTP
-    - name: Install NTP
-      apt: name=ntp update_cache=yes
-    - name: Setting NTP (1/2)
-      replace:
-        dest: /etc/ntp.conf
-        regexp: '^pool'
-        replace: '#pool'
-        backup: true
-    - name: Setting NTP (2/2)
+    - name: Setting timesyncd
       lineinfile:
-        dest: /etc/ntp.conf
-        insertafter: '^#pool'
-        line: '{{item}}'
-        backup: true
-      with_items:
-        - 'server ntp2.ring.gr.jp'
-        - 'server ntp1.ring.gr.jp'
-        - 'server ntp0.ring.gr.jp'
-    - name: Restart NTPd
+        dest: /etc/systemd/timesyncd.conf
+        line: 'NTP=ntp.ring.gr.jp'
+    - name: Restart timesyncd
       service:
-        name: ntp
+        name: systemd-timesyncd.service
         state: restarted
     # Install Softwares
     - name: Install Softwares

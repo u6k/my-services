@@ -68,27 +68,18 @@
       timezone:
         name: Asia/Tokyo
     # Setting NTP
-    - name: Install NTP
-      apt: name=ntp update_cache=yes
-    - name: Setting NTP (1/2)
-      replace:
-        dest: /etc/ntp.conf
-        regexp: '^pool'
-        replace: '#pool'
-        backup: true
-    - name: Setting NTP (2/2)
-      lineinfile:
-        dest: /etc/ntp.conf
-        insertafter: '^#pool'
-        line: '{{item}}'
-        backup: true
-      with_items:
-        - 'server ntp2.ring.gr.jp'
-        - 'server ntp1.ring.gr.jp'
-        - 'server ntp0.ring.gr.jp'
-    - name: Restart NTPd
-      service:
+    - name: Purge ntp
+      apt:
         name: ntp
+        purge: true
+        state: absent
+    - name: Setting timesyncd
+      lineinfile:
+        dest: /etc/systemd/timesyncd.conf
+        line: 'NTP=ntp.ring.gr.jp'
+    - name: Restart timesyncd
+      service:
+        name: systemd-timesyncd.service
         state: restarted
     # Install Softwares
     - name: Install Softwares
@@ -149,7 +140,7 @@
         owner: '{{sshd_user}}'
         group: '{{sshd_user}}'
     - name: Resize Raspbian image
-      shell: qemu-img resize 2018-11-13-raspbian-stretch-lite.img +8G
+      shell: qemu-img resize 2019-04-08-raspbian-stretch-lite.img +8G
       args:
         chdir: /var/raspi
     - name: Create swap storage
@@ -189,7 +180,7 @@
             -no-reboot \
             -serial stdio \
             -append "root=/dev/sda2 panic=1 rootfstype=ext4 rw" \
-            -hda 2018-11-13-raspbian-stretch-lite.img \
+            -hda 2019-04-08-raspbian-stretch-lite.img \
             -hdb temp.img \
             -net nic \
             -net user,hostfwd=tcp::10022-:22,hostfwd=tcp::80-:80,hostfwd=tcp::443-:443 \
