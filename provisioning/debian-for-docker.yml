@@ -1,6 +1,5 @@
-- hosts: vagrants
+- hosts: localhost
   become: yes
-  user: vagrant
   vars_files:
     - settings.yml
   tasks:
