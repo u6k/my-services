@@ -141,6 +141,15 @@
         - 80
         - 443
         - '{{sshd_port}}'
+    # Install
+    - name: Download ngrok package
+      get_url:
+        url: https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+        dest: /usr/local/src/
+    - name: Install ngrok
+      unarchive:
+        src: /usr/local/src/ngrok-stable-linux-amd64.zip
+        dest: /usr/local/bin/
     # Setting vim
     - name: Copy vimrc
       template:
