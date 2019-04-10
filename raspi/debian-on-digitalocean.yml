@@ -140,7 +140,7 @@
         owner: '{{sshd_user}}'
         group: '{{sshd_user}}'
     - name: Resize Raspbian image
-      shell: qemu-img resize 2018-11-13-raspbian-stretch-lite.img +8G
+      shell: qemu-img resize 2019-04-08-raspbian-stretch-lite.img +8G
       args:
         chdir: /var/raspi
     - name: Create swap storage
@@ -180,7 +180,7 @@
             -no-reboot \
             -serial stdio \
             -append "root=/dev/sda2 panic=1 rootfstype=ext4 rw" \
-            -hda 2018-11-13-raspbian-stretch-lite.img \
+            -hda 2019-04-08-raspbian-stretch-lite.img \
             -hdb temp.img \
             -net nic \
             -net user,hostfwd=tcp::10022-:22,hostfwd=tcp::80-:80,hostfwd=tcp::443-:443 \
