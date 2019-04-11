@@ -127,6 +127,7 @@
         - p7zip-full
         - parted
         - curl
+        - awscli
     # Setup firewall
     - name: Setting ufw
       ufw:
