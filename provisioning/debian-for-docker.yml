@@ -19,24 +19,10 @@
         name: '{{sshd_user}}'
         groups: wheel
         shell: /bin/bash
-    - name: mkdir .ssh
-      file:
-        dest: '/home/{{sshd_user}}/.ssh/'
-        state: directory
-        owner: '{{sshd_user}}'
-        group: '{{sshd_user}}'
-        mode: 0700 
     - name: Create authorized keys
-      file:
-        dest: '/home/{{sshd_user}}/.ssh/authorized_keys'
-        state: touch
-        owner: '{{sshd_user}}'
-        group: '{{sshd_user}}'
-        mode: 0600
-    - name: Copy public key
-      copy:
-        dest: '/home/{{sshd_user}}/.ssh/authorized_keys'
-        content: '{{sshd_public_key}}'
+      authorized_key:
+        key: '{{sshd_public_key}}'
+        user: '{{sshd_user}}'
     # Setting SSH
     - name: Setting SSH
       lineinfile:
