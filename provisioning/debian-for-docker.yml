@@ -97,6 +97,7 @@
         - parted
         - lvm2
         - keychain
+        - awscli
     # Setting Docker
     - name: Add docker group to user
       user:
