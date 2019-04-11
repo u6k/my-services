@@ -252,7 +252,7 @@ $ sudo halt
 ```
 
 ```
-$ cp 2018-11-13-raspbian-stretch-lite.img 2018-11-13-raspbian-stretch-lite.img.bak
+$ cp 2019-04-08-raspbian-stretch-lite.img 2019-04-08-raspbian-stretch-lite.img.bak
 ```
 
 何かあっても、`.bak`ファイルで上書きすれば、現時点の状況まで戻ります。
