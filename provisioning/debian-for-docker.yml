@@ -110,6 +110,7 @@
         - p7zip-full
         - parted
         - lvm2
+        - keychain
     # Setting Docker
     - name: Add docker group to user
       user:

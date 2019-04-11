@@ -9,7 +9,7 @@
 ### 最低限のソフトウェアをインストール
 
 ```
-apt update && apt -y upgrade && apt -y install git ansible python-apt vim
+apt update && apt -y upgrade && apt -y install git ansible python-apt vim tmux
 ```
 
 他に必要なソフトウェアがある場合は、Ansible Playbookに追加します。
