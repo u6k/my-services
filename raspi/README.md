@@ -49,7 +49,7 @@ Dropletを作成したら、`root`でsshログインします。
 Ansible Playbookを実行するために、最低限のソフトウェアをインストールします。
 
 ```
-apt update && apt -y upgrade && apt -y install git ansible python-apt
+apt update && apt -y upgrade && apt -y install git ansible python-apt tmux
 ```
 
 他に必要なソフトウェアがあれば、Ansible Playbookに追加するとよいです。
