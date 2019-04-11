@@ -3,5 +3,6 @@ sshd_user: foo
 sshd_public_key: ssh_rsa xxx
 git_user_name: foo
 git_user_email: foo@example.com
+pgsql_port: 5432
 mydns_user: aaa
 mydns_pass: bbb

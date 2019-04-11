@@ -124,6 +124,7 @@
       with_items:
         - 80
         - 443
+        - '{{pgsql_port}}'
         - '{{sshd_port}}'
     # Setting git
     - name: Copy git config
