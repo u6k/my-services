@@ -1,0 +1,14 @@
+- hosts: localhost
+  become: yes
+  user: pi
+  vars_files:
+    - settings.yml
+  tasks:
+    - name: Download postgresql package
+      get_url:
+        url: https://ftp.postgresql.org/pub/source/v11.2/postgresql-11.2.tar.bz2
+        dest: /usr/local/src/
+    - name: Extract postgresql package
+      unarchive:
+        src: /usr/local/src/postgresql-11.2.tar.bz2
+        dest: /usr/local/src/
