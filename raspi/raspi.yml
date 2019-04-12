@@ -98,22 +98,23 @@
         state: restarted
     # Install Softwares
     - name: Install Softwares
-      apt: name={{item}} update_cache=yes
-      with_items:
-        - git
-        - git-flow
-        - tig
-        - tmux
-        - vim
-        - lvm2
-        - exfat-fuse
-        - exfat-utils
-        - ufw
-        - zip
-        - p7zip-full
-        - parted
-        - curl
-        - awscli
+      apt:
+        name:
+          - git
+          - git-flow
+          - tig
+          - tmux
+          - vim
+          - lvm2
+          - exfat-fuse
+          - exfat-utils
+          - ufw
+          - zip
+          - p7zip-full
+          - parted
+          - curl
+          - awscli
+        update_cache: yes
     # Setup firewall
     - name: Setting ufw
       ufw:
@@ -303,6 +304,7 @@
           - zlib1g-dev
           - libssl-dev
           - libsystemd-dev
+          - python-pip
         update_cache: yes
     - name: Install pip for ansible openssl module
       pip:
