@@ -318,6 +318,7 @@
       unarchive:
         src: /usr/local/src/postgresql-11.2.tar.bz2
         dest: /usr/local/src/
+        remote_src: yes
     - name: Configure postgresql
       shell: ./configure --with-systemd --with-openssl
       args:
