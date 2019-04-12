@@ -294,3 +294,113 @@
         name: mydns.timer
         enabled: yes
         state: restarted
+    # Setup postgresql
+    - name: Install require softwares for postgresql
+      apt:
+        name:
+          - build-essential
+          - libreadline-dev
+          - zlib1g-dev
+          - libssl-dev
+          - libsystemd-dev
+        update_cache: yes
+    - name: Install pip for ansible openssl module
+      pip:
+        name: pyOpenSSL
+    - name: Download postgresql package
+      get_url:
+        url: https://ftp.postgresql.org/pub/source/v11.2/postgresql-11.2.tar.bz2
+        dest: /usr/local/src/
+    - name: Extract postgresql package
+      unarchive:
+        src: /usr/local/src/postgresql-11.2.tar.bz2
+        dest: /usr/local/src/
+    - name: Configure postgresql
+      shell: ./configure --with-systemd --with-openssl
+      args:
+        chdir: /usr/local/src/postgresql-11.2/
+    - name: Make postgresql
+      make:
+        chdir: /usr/local/src/postgresql-11.2/
+    - name: Install postgresql
+      make:
+        chdir: /usr/local/src/postgresql-11.2/
+        target: install
+    - name: Add postgres user
+      user:
+        name: postgres
+    - name: Create postgresql data directory
+      file:
+        path: /mnt/data/pgsql/data/
+        state: directory
+        owner: postgres
+    - name: Initialize postgresql data
+      shell: /usr/local/pgsql/bin/initdb -D /mnt/data/pgsql/data/
+      become: yes
+      become_user: postgres
+    - name: Link psql
+      file:
+        src: /usr/local/pgsql/bin/psql
+        dest: /usr/local/bin/psql
+        state: link
+    - name: Add config in pg_hba.conf
+      lineinfile:
+        dest: /mnt/data/pgsql/data/pg_hba.conf
+        line: 'hostssl all {{pgsql_user}} 0.0.0.0/0 md5'
+    - name: Add config in postgresql.conf
+      lineinfile:
+        dest: /mnt/data/pgsql/data/postgresql.conf
+        line: '{{item}}'
+      with_items:
+        - "listen_addresses = '*'"
+        - 'port = {{pgsql_port}}'
+        - 'ssl = on'
+    - name: Create ssl private key for postgresql
+      openssl_privatekey:
+        path: /mnt/data/pgsql/data/server.key
+      become: yes
+      become_user: postgres
+    - name: Create ssl csr for postgresql
+      openssl_csr:
+        path: /mnt/data/pgsql/data/server.csr
+        privatekey_path: /mnt/data/pgsql/data/server.key
+        country_name: JP
+        organization_name: '{{git_user_name}}'
+        email_address: '{{git_user_email}}'
+        common_name: db.u6k.me
+      become: yes
+      become_user: postgres
+    - name: Create ssl certificate for postgresql
+      openssl_certificate:
+        path: /mnt/data/pgsql/data/server.crt
+        privatekey_path: /mnt/data/pgsql/data/server.key
+        csr_path: /mnt/data/pgsql/data/server.csr
+        provider: selfsigned
+      become: yes
+      become_user: postgres
+    - name: Create postgresql service file
+      copy:
+        dest: /etc/systemd/system/postgresql.service
+        content: |
+          [Unit]
+          Description=PostgreSQL database server
+          Documentation=man:postgres(1)
+
+          [Service]
+          Type=notify
+          User=postgres
+          ExecStart=/usr/local/pgsql/bin/postgres -D /mnt/data/pgsql/data/
+          ExecReload=/bin/kill -HUP $MAINPID
+          KillMode=mixed
+          KillSignal=SIGINT
+          TimeoutSec=0
+
+          [Install]
+          WantedBy=multi-user.target
+    - name: Enable postgresql service
+      service:
+        name: postgresql.service
+        enabled: yes
+        state: restarted
+    - name: Create postgresql user
+      shell: echo "create user {{pgsql_user}} with encrypted password '{{pgsql_pass}}' createdb createrole" | psql -U postgres -p {{pgsql_port}}
