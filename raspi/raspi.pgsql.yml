@@ -4,6 +4,11 @@
   vars_files:
     - settings.yml
   tasks:
+    - name: Install require softwares for postgresql
+      apt: name={{item}} update_cache=yes
+      with_items:
+        - build-essential
+        - libssl-dev
     - name: Download postgresql package
       get_url:
         url: https://ftp.postgresql.org/pub/source/v11.2/postgresql-11.2.tar.bz2
