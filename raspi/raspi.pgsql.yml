@@ -12,6 +12,9 @@
         - zlib1g-dev
         - libssl-dev
         - libsystemd-dev
+    - name: Install pip for ansible openssl module
+      pip:
+        name: pyOpenSSL
     - name: Download postgresql package
       get_url:
         url: https://ftp.postgresql.org/pub/source/v11.2/postgresql-11.2.tar.bz2
@@ -41,6 +44,8 @@
         owner: postgres
     - name: Initialize postgresql data
       shell: /usr/local/pgsql/bin/initdb -D /mnt/data/pgsql/data/
+      become: yes
+      become_user: postgres
     - name: Link psql
       file:
         src: /usr/local/pgsql/bin/psql
@@ -61,6 +66,8 @@
     - name: Create ssl private key for postgresql
       openssl_privatekey:
         path: /mnt/data/pgsql/data/server.key
+      become: yes
+      become_user: postgres
     - name: Create ssl csr for postgresql
       openssl_csr:
         path: /mnt/data/pgsql/data/server.csr
@@ -69,12 +76,16 @@
         organization_name: '{{git_user_name}}'
         email_address: '{{git_user_email}}'
         common_name: db.u6k.me
+      become: yes
+      become_user: postgres
     - name: Create ssl certificate for postgresql
       openssl_certificate:
         path: /mnt/data/pgsql/data/server.crt
         privatekey_path: /mnt/data/pgsql/data/server.key
         csr_path: /mnt/data/pgsql/data/server.csr
         provider: selfsigned
+      become: yes
+      become_user: postgres
     - name: Create postgresql service file
       copy:
         dest: /etc/systemd/system/postgresql.service
