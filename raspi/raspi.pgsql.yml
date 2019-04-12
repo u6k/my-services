@@ -5,16 +5,19 @@
     - settings.yml
   tasks:
     - name: Install require softwares for postgresql
-      apt: name={{item}} update_cache=yes
-      with_items:
-        - build-essential
-        - libreadline-dev
-        - zlib1g-dev
-        - libssl-dev
-        - libsystemd-dev
+      apt:
+        name:
+          - build-essential
+          - libreadline-dev
+          - zlib1g-dev
+          - libssl-dev
+          - libsystemd-dev
+        update_cache: yes
     - name: Install pip for ansible openssl module
       pip:
-        name: pyOpenSSL
+        name:
+          - pyOpenSSL
+          - psycopg2
     - name: Download postgresql package
       get_url:
         url: https://ftp.postgresql.org/pub/source/v11.2/postgresql-11.2.tar.bz2
@@ -110,3 +113,9 @@
         name: postgresql.service
         enabled: yes
         state: restarted
+    - name: Create postgresql user
+      postgresql_user:
+        name: '{{pgsql_user}}'
+        password: '{{pgsql_pass}}'
+        port: '{{pgsql_port}}'
+        role_attr_flags: SUPERUSER
