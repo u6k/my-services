@@ -11,8 +11,15 @@
     - name: Extract postgresql package
       unarchive:
         src: /usr/local/src/postgresql.tar.bz2
-        dest: /usr/local/src/
+        dest: /usr/local/src/postgresql
     - name: Configure postgresql
       shell: ./configure --with-systemd --with-openssl
       args:
         chdir: /usr/local/src/postgresql/
+    - name: Make postgresql
+      make:
+        chdir: /usr/local/src/postgresql/
+    - name: Install postgresql
+      make:
+        chdir: /usr/local/src/postgresql/
+        target: install
