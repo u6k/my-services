@@ -31,6 +31,9 @@
       make:
         chdir: /usr/local/src/postgresql-11.2/
         target: install
+    - name: Add postgres user
+      user:
+        name: postgres
     - name: Create postgresql data directory
       file:
         path: /mnt/data/pgsql/data/
