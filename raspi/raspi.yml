@@ -305,6 +305,7 @@
           - libssl-dev
           - libsystemd-dev
           - python-pip
+          - libffi-devel
         update_cache: yes
     - name: Install pip for ansible openssl module
       pip:
