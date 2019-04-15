@@ -49,8 +49,10 @@ Dropletを作成したら、`root`でsshログインします。
 Ansible Playbookを実行するために、最低限のソフトウェアをインストールします。
 
 ```
-apt update && apt -y upgrade && apt -y install git ansible python-apt
+apt update && apt -y upgrade && apt -y install git python-pip python-apt vim tmux && pip install ansible
 ```
+
+> __TODO:__ Ansible v2.7.10のufwモジュールにバグがあるため、2.6系をインストールするとよい。例): `pip install ansible==2.6.16`
 
 他に必要なソフトウェアがあれば、Ansible Playbookに追加するとよいです。
 
@@ -252,7 +254,7 @@ $ sudo halt
 ```
 
 ```
-$ cp 2018-11-13-raspbian-stretch-lite.img 2018-11-13-raspbian-stretch-lite.img.bak
+$ cp 2019-04-08-raspbian-stretch-lite.img 2019-04-08-raspbian-stretch-lite.img.bak
 ```
 
 何かあっても、`.bak`ファイルで上書きすれば、現時点の状況まで戻ります。

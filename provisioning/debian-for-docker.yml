@@ -1,6 +1,5 @@
-- hosts: vagrants
+- hosts: localhost
   become: yes
-  user: vagrant
   vars_files:
     - settings.yml
   tasks:
@@ -20,24 +19,10 @@
         name: '{{sshd_user}}'
         groups: wheel
         shell: /bin/bash
-    - name: mkdir .ssh
-      file:
-        dest: '/home/{{sshd_user}}/.ssh/'
-        state: directory
-        owner: '{{sshd_user}}'
-        group: '{{sshd_user}}'
-        mode: 0700 
     - name: Create authorized keys
-      file:
-        dest: '/home/{{sshd_user}}/.ssh/authorized_keys'
-        state: touch
-        owner: '{{sshd_user}}'
-        group: '{{sshd_user}}'
-        mode: 0600
-    - name: Copy public key
-      template:
-        src: 'id_rsa.pub'
-        dest: '/home/{{sshd_user}}/.ssh/authorized_keys'
+      authorized_key:
+        key: '{{sshd_public_key}}'
+        user: '{{sshd_user}}'
     # Setting SSH
     - name: Setting SSH
       lineinfile:
@@ -68,37 +53,29 @@
       timezone:
         name: Asia/Tokyo
     # Setting NTP
-    - name: Install NTP
-      apt: name=ntp update_cache=yes
-    - name: Setting NTP (1/2)
-      replace:
-        dest: /etc/ntp.conf
-        regexp: '^pool'
-        replace: '#pool'
-        backup: true
-    - name: Setting NTP (2/2)
-      lineinfile:
-        dest: /etc/ntp.conf
-        insertafter: '^#pool'
-        line: '{{item}}'
-        backup: true
-      with_items:
-        - 'server ntp2.ring.gr.jp'
-        - 'server ntp1.ring.gr.jp'
-        - 'server ntp0.ring.gr.jp'
-    - name: Restart NTPd
-      service:
+    - name: Purge ntp
+      apt:
         name: ntp
+        purge: true
+        state: absent
+    - name: Setting timesyncd
+      lineinfile:
+        dest: /etc/systemd/timesyncd.conf
+        line: 'NTP=ntp.ring.gr.jp'
+    - name: Restart timesyncd
+      service:
+        name: systemd-timesyncd.service
         state: restarted
     # Install Docker CE
     - name: PreInstall Docker (1/4)
-      apt: name={{item}} update_cache=yes
-      with_items:
-        - apt-transport-https
-        - ca-certificates
-        - curl
-        - gnupg2
-        - software-properties-common
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg2
+          - software-properties-common
+        update_cache: yes
     - name: PreInstall Docker (2/4)
       shell: curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
     - name: PreInstall Docker (3/4)
@@ -107,19 +84,28 @@
       shell: add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
     # Install Softwares
     - name: Install Softwares
-      apt: name={{item}} update_cache=yes
-      with_items:
-        - docker-ce
-        - git
-        - git-flow
-        - tig
-        - tmux
-        - ufw
-        - vim
-        - zip
-        - p7zip-full
-        - parted
-        - lvm2
+      apt:
+        name:
+          - docker-ce
+          - git
+          - git-flow
+          - tig
+          - tmux
+          - ufw
+          - vim
+          - zip
+          - p7zip-full
+          - parted
+          - lvm2
+          - keychain
+          - awscli
+        update_cache: yes
+    # Setting Docker
+    - name: Add docker group to user
+      user:
+        name: '{{sshd_user}}'
+        append: yes
+        groups: 'docker'
     # Setting git
     - name: Copy git config
       template:
@@ -151,6 +137,15 @@
         - 80
         - 443
         - '{{sshd_port}}'
+    # Install
+    - name: Download ngrok package
+      get_url:
+        url: https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+        dest: /usr/local/src/
+    - name: Install ngrok
+      unarchive:
+        src: /usr/local/src/ngrok-stable-linux-amd64.zip
+        dest: /usr/local/bin/
     # Setting vim
     - name: Copy vimrc
       template:
