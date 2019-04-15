@@ -69,17 +69,18 @@
         state: restarted
     # Install Softwares
     - name: Install Softwares
-      apt: name={{item}} update_cache=yes
-      with_items:
-        - git
-        - git-flow
-        - tig
-        - tmux
-        - qemu
-        - unzip
-        - sshpass
-        - curl
-        - ufw
+      apt:
+        name:
+          - git
+          - git-flow
+          - tig
+          - tmux
+          - qemu
+          - unzip
+          - sshpass
+          - curl
+          - ufw
+        update_cache: yes
     # Setting git
     - name: Copy git config
       template:
