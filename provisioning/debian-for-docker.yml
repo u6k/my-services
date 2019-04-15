@@ -68,13 +68,14 @@
         state: restarted
     # Install Docker CE
     - name: PreInstall Docker (1/4)
-      apt: name={{item}} update_cache=yes
-      with_items:
-        - apt-transport-https
-        - ca-certificates
-        - curl
-        - gnupg2
-        - software-properties-common
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg2
+          - software-properties-common
+        update_cache: yes
     - name: PreInstall Docker (2/4)
       shell: curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
     - name: PreInstall Docker (3/4)
@@ -83,21 +84,22 @@
       shell: add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
     # Install Softwares
     - name: Install Softwares
-      apt: name={{item}} update_cache=yes
-      with_items:
-        - docker-ce
-        - git
-        - git-flow
-        - tig
-        - tmux
-        - ufw
-        - vim
-        - zip
-        - p7zip-full
-        - parted
-        - lvm2
-        - keychain
-        - awscli
+      apt:
+        name:
+          - docker-ce
+          - git
+          - git-flow
+          - tig
+          - tmux
+          - ufw
+          - vim
+          - zip
+          - p7zip-full
+          - parted
+          - lvm2
+          - keychain
+          - awscli
+        update_cache: yes
     # Setting Docker
     - name: Add docker group to user
       user:

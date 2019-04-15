@@ -183,7 +183,9 @@
         state: restarted
     # Setup nginx reverse proxy
     - name: Install nginx
-      apt: name=nginx update_cache=true
+      apt:
+        name: nginx
+        update_cache: yes
       ignore_errors: yes
     - name: Modify nginx config
       lineinfile:
