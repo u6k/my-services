@@ -1,0 +1,10 @@
+[Unit]
+Description=Crawl github activity
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/sysconfig/crawl-github-activity
+ExecStart=/usr/local/bin/crawl-github-activity.sh
+
+[Install]
+WantedBy=multi-user.target

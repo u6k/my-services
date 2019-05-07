@@ -1,0 +1,10 @@
+[Unit]
+Description=Update and upgrade installed softwares
+
+[Service]
+Type=oneshot
+ExecStartPre=/usr/bin/apt update
+ExecStart=/usr/bin/apt -y upgrade
+
+[Install]
+WantedBy=multi-user.target

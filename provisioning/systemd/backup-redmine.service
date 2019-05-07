@@ -1,0 +1,10 @@
+[Unit]
+Description=Backup redmine data
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/sysconfig/backup-redmine
+ExecStart=/usr/local/bin/backup-redmine.sh
+
+[Install]
+WantedBy=multi-user.target
