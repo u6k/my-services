@@ -1,0 +1,9 @@
+[Unit]
+Description=Run crawl-redmine-activity.service
+
+[Timer]
+OnCalendar=hourly
+Persistent=true
+
+[Install]
+WantedBy=timers.target

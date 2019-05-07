@@ -1,0 +1,13 @@
+[Unit]
+Description=Parse stocks
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/sysconfig/crawl-stocks
+ExecStartPre=/usr/bin/docker pull u6kapps/investment-stocks-crawler
+ExecStartPre=/usr/bin/curl -X POST -d 'payload={"text":"parse-stocks start"}' https://hooks.slack.com/services/${SLACK_TOKEN}
+ExecStart=/usr/local/bin/crawl-stocks.sh parse https://kabuoji3.com/stock/
+ExecStartPost=/usr/bin/curl -X POST -d 'payload={"text":"parse-stocks finish"}' https://hooks.slack.com/services/${SLACK_TOKEN}
+
+[Install]
+WantedBy=multi-user.target

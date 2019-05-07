@@ -1,0 +1,10 @@
+[Unit]
+Description=Update mydns ip address
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/sysconfig/mydns
+ExecStart=/usr/local/bin/update-mydns.sh
+
+[Install]
+WantedBy=multi-user.target

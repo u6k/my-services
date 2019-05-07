@@ -1,0 +1,10 @@
+[Unit]
+Description=Crawl redmine activity
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/sysconfig/crawl-redmine-activity
+ExecStart=/usr/local/bin/crawl-redmine-activity.sh
+
+[Install]
+WantedBy=multi-user.target
