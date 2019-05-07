@@ -1,0 +1,10 @@
+[Unit]
+Description=Backup stocks data
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/sysconfig/backup-stocks
+ExecStart=/usr/local/bin/backup-stocks.sh
+
+[Install]
+WantedBy=multi-user.target

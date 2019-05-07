@@ -1,0 +1,13 @@
+[Unit]
+Description=Crawl horse racing
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/sysconfig/crawl-horse-racing
+ExecStartPre=/usr/bin/docker pull u6kapps/investment-horse-racing-crawler
+ExecStartPre=/usr/bin/curl -X POST -d 'payload={"text":"crawl-horse-racing start"}' https://hooks.slack.com/services/${SLACK_TOKEN}
+ExecStart=/usr/local/bin/crawl-horse-racing.sh crawl https://keiba.yahoo.co.jp/schedule/
+ExecStartPost=/usr/bin/curl -X POST -d 'payload={"text":"crawl-horse-racing finish"}' https://hooks.slack.com/services/${SLACK_TOKEN}
+
+[Install]
+WantedBy=multi-user.target

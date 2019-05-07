@@ -1,0 +1,13 @@
+[Unit]
+Description=Parse nikkei averages
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/sysconfig/crawl-stocks
+ExecStartPre=/usr/bin/docker pull u6kapps/investment-stocks-crawler
+ExecStartPre=/usr/bin/curl -X POST -d 'payload={"text":"parse-nikkei-averages start"}' https://hooks.slack.com/services/${SLACK_TOKEN}
+ExecStart=/usr/local/bin/crawl-stocks.sh parse https://indexes.nikkei.co.jp/nkave/archives/data
+ExecStartPost=/usr/bin/curl -X POST -d 'payload={"text":"parse-nikkei-averages finish"}' https://hooks.slack.com/services/${SLACK_TOKEN}
+
+[Install]
+WantedBy=multi-user.target
