@@ -1,0 +1,13 @@
+[Unit]
+Description=Crawl topix
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/sysconfig/crawl-stocks
+ExecStartPre=/usr/bin/docker pull u6kapps/investment-stocks-crawler
+ExecStartPre=/usr/bin/curl -X POST -d 'payload={"text":"crawl-topix start"}' https://hooks.slack.com/services/${SLACK_TOKEN}
+ExecStart=/usr/local/bin/crawl-stocks.sh crawl https://quotes.wsj.com/index/JP/XTKS/I0000/historical-prices/
+ExecStartPost=/usr/bin/curl -X POST -d 'payload={"text":"crawl-topix finish"}' https://hooks.slack.com/services/${SLACK_TOKEN}
+
+[Install]
+WantedBy=multi-user.target
