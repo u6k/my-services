@@ -1,0 +1,13 @@
+[Unit]
+Description=Crawl tdnet and xbrl
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/sysconfig/crawl-stocks
+ExecStartPre=/usr/bin/docker pull u6kapps/investment-stocks-crawler
+ExecStartPre=/usr/bin/curl -X POST -d 'payload={"text":"crawl-tdnet start"}' https://hooks.slack.com/services/${SLACK_TOKEN}
+ExecStart=/usr/local/bin/crawl-stocks.sh crawl https://resource.ufocatch.com/atom/tdnetx
+ExecStartPost=/usr/bin/curl -X POST -d 'payload={"text":"crawl-tdnet finish"}' https://hooks.slack.com/services/${SLACK_TOKEN}
+
+[Install]
+WantedBy=multi-user.target
