@@ -1,0 +1,9 @@
+[Unit]
+Description=Run backup-horse-racing.service
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+
+[Install]
+WantedBy=timers.target
