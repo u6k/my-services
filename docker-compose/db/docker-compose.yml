@@ -4,7 +4,8 @@ services:
   db:
     image: postgres:11
     volumes:
-      - "${DOCKER_VOLUMES}/db:/var/lib/postgresql/data"
+      - "${DOCKER_VOLUMES}/db/data:/var/lib/postgresql/data"
+      - "${DOCKER_VOLUMES}/db/wal_archive:/archive"
     environment:
       - "POSTGRES_USER=${DOCKER_DB_USERNAME}"
       - "POSTGRES_PASSWORD=${DOCKER_DB_PASSWORD}"
