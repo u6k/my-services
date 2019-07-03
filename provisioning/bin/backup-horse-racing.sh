@@ -1,19 +1,10 @@
-#!/bin/sh -eu
+#!/bin/bash -eu
 
-WORK_DIR=`mktemp -d`
-cd ${WORK_DIR}
+source /home/u6k/.env
 
-SQL_FILE=horse-racing.`date +%Y%m%d-%H%M%S`.sql
+/usr/local/bin/pg_rman_horse_racing.sh backup --backup-mode=incremental --with-serverlog --compress-data
+/usr/local/bin/pg_rman_horse_racing.sh validate
 
-echo "Dump db data"
-docker exec ${DB_CONTAINER} pg_dump -U ${DB_USERNAME} ${DB_DATABASE} >${SQL_FILE}
-
-echo "Compress db data"
-7z a -mx=9 ${SQL_FILE}.7z ${SQL_FILE}
-rm ${SQL_FILE}
-
-echo "upload to s3"
-aws --profile ${S3_PROFILE} --endpoint-url ${S3_ENDPOINT} s3 sync . s3://${S3_BUCKET}
-
-echo "cleanup"
-rm -rf ${WORK_DIR}
+echo "rsync to raspi"
+rsync -av -e "ssh -p 64330 -i /root/.ssh/id_rsa_job" ${DOCKER_VOLUMES}/db_horse_racing/backup/ u6k@s3.u6k.me:/mnt/data/backup/horse-racing/backup/
+rsync -av -e "ssh -p 64330 -i /root/.ssh/id_rsa_job" ${DOCKER_VOLUMES}/db/wal_archive/ u6k@s3.u6k.me:/mnt/data/backup/horse-racing/wal_backup/
