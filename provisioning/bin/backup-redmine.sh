@@ -1,21 +1,11 @@
-#!/bin/sh -eu
+#!/bin/bash -eu
 
-WORK_DIR=`mktemp -d`
-cd ${WORK_DIR}
+source /home/u6k/.env
 
-echo "Dump db data"
-SQL_FILE=redmine.`date +%Y%m%d-%H%M%S`.sql
-docker exec ${DB_CONTAINER} pg_dump -U ${DB_USERNAME} ${DB_DATABASE} >${SQL_FILE}
+/usr/local/bin/pg_rman_redmine.sh backup --backup-mode=incremental --with-serverlog --compress-data --verbose
+/usr/local/bin/pg_rman_redmine.sh validate
 
-echo "Compress db data"
-7z a -mx=9 ${SQL_FILE}.7z ${SQL_FILE}
-rm ${SQL_FILE}
-
-echo "Dump files"
-docker cp ${APP_CONTAINER}:/usr/src/redmine/files/ attachment-file/
-
-echo "upload to s3"
-aws --profile ${S3_PROFILE} --endpoint-url ${S3_ENDPOINT} s3 sync . s3://${S3_BUCKET}
-
-echo "cleanup"
-rm -rf ${WORK_DIR}
+echo "rsync to raspi"
+rsync -av -e "ssh -p 64330 -i /root/.ssh/id_rsa_job" /mnt/data/backup/redmine/backup/ u6k@s3.u6k.me:/mnt/data/backup/redmine/backup/
+rsync -av -e "ssh -p 64330 -i /root/.ssh/id_rsa_job" ${DOCKER_VOLUMES}/redmine/wal_archive/ u6k@s3.u6k.me:/mnt/data/backup/redmine/wal_archive/
+rsync -av -e "ssh -p 64330 -i /root/.ssh/id_rsa_job" ${DOCKER_VOLUMES}/redmine/files/ u6k@s3.u6k.me:/mnt/data/backup/redmine/files/
