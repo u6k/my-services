@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:11
+    volumes:
+      - "${DOCKER_VOLUMES}/horse-racing/db:/var/lib/postgresql/data"
+      - "${DOCKER_VOLUMES}/horse-racing/wal_archive:/archive"
+    environment:
+      - "POSTGRES_USER=${DOCKER_HORSE_RACING_DB_USERNAME}"
+      - "POSTGRES_PASSWORD=${DOCKER_HORSE_RACING_DB_PASSWORD}"
+      - "POSTGRES_DB=${DOCKER_HORSE_RACING_DB_DATABASE}"
+    restart: always
+
+networks:
+  default:
+    external:
+      name: production
