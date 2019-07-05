@@ -3,7 +3,6 @@ Description=Backup horse racing data
 
 [Service]
 Type=oneshot
-EnvironmentFile=/etc/sysconfig/backup-horse-racing
 ExecStart=/usr/local/bin/backup-horse-racing.sh
 
 [Install]

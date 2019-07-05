@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:11
+    volumes:
+      - "${DOCKER_VOLUMES}/stocks/db:/var/lib/postgresql/data"
+      - "${DOCKER_VOLUMES}/stocks/wal_archive:/archive"
+    environment:
+      - "POSTGRES_USER=${DOCKER_STOCKS_DB_USERNAME}"
+      - "POSTGRES_PASSWORD=${DOCKER_STOCKS_DB_PASSWORD}"
+      - "POSTGRES_DB=${DOCKER_STOCKS_DB_DATABASE}"
+    restart: always
+
+networks:
+  default:
+    external:
+      name: production
