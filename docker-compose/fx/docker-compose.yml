@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:11
+    volumes:
+      - "${DOCKER_VOLUMES}/fx/db:/var/lib/postgresql/data"
+      - "${DOCKER_VOLUMES}/fx/tmp:/tmp"
+      - "${DOCKER_VOLUMES}/fx/wal_archive:/archive"
+    environment:
+      - "POSTGRES_USER=${DOCKER_FX_DB_USERNAME}"
+      - "POSTGRES_PASSWORD=${DOCKER_FX_DB_PASSWORD}"
+      - "POSTGRES_DB=${DOCKER_FX_DB_DATABASE}"
+    restart: always
+
+networks:
+  default:
+    external:
+      name: production

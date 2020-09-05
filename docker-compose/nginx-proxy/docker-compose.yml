@@ -2,7 +2,7 @@ version: '2'
 
 services:
   proxy:
-    image: u6kapps/nginx-proxy
+    image: jwilder/nginx-proxy
     privileged: true
     ports:
       - "80:80"
@@ -13,6 +13,7 @@ services:
       - "/etc/nginx/vhost.d"
       - "/usr/share/nginx/html"
       - "/var/run/docker.sock:/tmp/docker.sock:ro"
+      - "./my-proxy.conf:/etc/nginx/conf.d/my-proxy.conf"
     restart: always
   cert:
     image: jrcs/letsencrypt-nginx-proxy-companion

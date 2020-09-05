@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  app:
+    image: u6kapps/investment-local-horse-racing-predict
+    volumes:
+      - "${DOCKER_VOLUMES}/local-horse-racing-predict/dataframe:/var/dataframe"
+    environment:
+      - "TZ=Asia/Tokyo"
+      - "VIRTUAL_HOST=local-horse-racing-predict.u6k.me"
+      - "VIRTUAL_PORT=5000"
+      - "LETSENCRYPT_HOST=local-horse-racing-predict.u6k.me"
+      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+      - "CRAWLER_DB_HOST=${DOCKER_LOCAL_HORSE_RACING_PREDICT_CRAWLER_DB_HOST}"
+      - "CRAWLER_DB_PORT=${DOCKER_LOCAL_HORSE_RACING_PREDICT_CRAWLER_DB_PORT}"
+      - "CRAWLER_DB_DATABASE=${DOCKER_LOCAL_HORSE_RACING_PREDICT_CRAWLER_DB_DATABASE}"
+      - "CRAWLER_DB_USERNAME=${DOCKER_LOCAL_HORSE_RACING_PREDICT_CRAWLER_DB_USERNAME}"
+      - "CRAWLER_DB_PASSWORD=${DOCKER_LOCAL_HORSE_RACING_PREDICT_CRAWLER_DB_PASSWORD}"
+      - "RESULT_PREDICT_MODEL_URL=${DOCKER_LOCAL_HORSE_RACING_PREDICT_RESULT_PREDICT_MODEL_URL}"
+      - "VOTE_PREDICT_MODEL_URL=${DOCKER_LOCAL_HORSE_RACING_PREDICT_VOTE_PREDICT_MODEL_URL}"
+    restart: always
+
+networks:
+  default:
+    external:
+      name: production

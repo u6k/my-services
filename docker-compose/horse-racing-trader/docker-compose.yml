@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  app:
+    image: u6kapps/investment-horse-racing-trader
+    environment:
+      - "TZ=Asia/Tokyo"
+      - "VIRTUAL_HOST=horse-racing-trader.u6k.me"
+      - "VIRTUAL_PORT=5000"
+      - "LETSENCRYPT_HOST=horse-racing-trader.u6k.me"
+      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+      - "DB_HOST=${DOCKER_HORSE_RACING_TRADER_DB_HOST}"
+      - "DB_PORT=${DOCKER_HORSE_RACING_TRADER_DB_PORT}"
+      - "DB_USERNAME=${DOCKER_HORSE_RACING_TRADER_DB_USERNAME}"
+      - "DB_PASSWORD=${DOCKER_HORSE_RACING_TRADER_DB_PASSWORD}"
+      - "DB_DATABASE=${DOCKER_HORSE_RACING_TRADER_DB_DATABASE}"
+      - "CRAWLER_DB_HOST=${DOCKER_HORSE_RACING_DB_HOST}"
+      - "CRAWLER_DB_PORT=${DOCKER_HORSE_RACING_DB_PORT}"
+      - "CRAWLER_DB_USERNAME=${DOCKER_HORSE_RACING_DB_USERNAME}"
+      - "CRAWLER_DB_PASSWORD=${DOCKER_HORSE_RACING_DB_PASSWORD}"
+      - "CRAWLER_DB_DATABASE=${DOCKER_HORSE_RACING_DB_DATABASE}"
+      - "API_PREDICT_URL=${DOCKER_HORSE_RACING_TRADER_API_PREDICT_URL}"
+      - "API_PREDICT_AUTH_USER=${DOCKER_HORSE_RACING_TRADER_API_PREDICT_AUTH_USER}"
+      - "API_PREDICT_AUTH_PASSWORD=${DOCKER_HORSE_RACING_TRADER_API_PREDICT_AUTH_PASSWORD}"
+    restart: always
+
+  db:
+    image: postgres:12
+    volumes:
+      - "${DOCKER_VOLUMES}/horse-racing-trader/db:/var/lib/postgresql/data"
+      - "${DOCKER_VOLUMES}/horse-racing-trader/wal_archive:/archive"
+    environment:
+      - "POSTGRES_USER=${DOCKER_HORSE_RACING_TRADER_DB_USERNAME}"
+      - "POSTGRES_PASSWORD=${DOCKER_HORSE_RACING_TRADER_DB_PASSWORD}"
+      - "POSTGRES_DB=${DOCKER_HORSE_RACING_TRADER_DB_DATABASE}"
+    restart: always
+  
+networks:
+  default:
+    external:
+      name: production

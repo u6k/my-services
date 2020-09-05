@@ -1,0 +1,67 @@
+version: '3'
+
+services:
+  app:
+    image: u6kapps/investment-local-horse-racing-trader
+    volumes:
+      - "${DOCKER_VOLUMES}/local-horse-racing-trader/screenshot:/var/screenshot"
+    environment:
+      - "TZ=Asia/Tokyo"
+      - "VIRTUAL_HOST=local-horse-racing-trader.u6k.me"
+      - "VIRTUAL_PORT=5000"
+      - "LETSENCRYPT_HOST=local-horse-racing-trader.u6k.me"
+      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+      - "ODDSPARK_USER_ID=${DOCKER_LOCAL_HORSE_RACING_TRADER_ODDSPARK_USER_ID}"
+      - "ODDSPARK_PASSWORD=${DOCKER_LOCAL_HORSE_RACING_TRADER_ODDSPARK_PASSWORD}"
+      - "ODDSPARK_PIN=${DOCKER_LOCAL_HORSE_RACING_TRADER_ODDSPARK_PIN}"
+      - "DB_HOST=${DOCKER_LOCAL_HORSE_RACING_TRADER_DB_HOST}"
+      - "DB_PORT=${DOCKER_LOCAL_HORSE_RACING_TRADER_DB_PORT}"
+      - "DB_USERNAME=${DOCKER_LOCAL_HORSE_RACING_TRADER_DB_USERNAME}"
+      - "DB_PASSWORD=${DOCKER_LOCAL_HORSE_RACING_TRADER_DB_PASSWORD}"
+      - "DB_DATABASE=${DOCKER_LOCAL_HORSE_RACING_TRADER_DB_DATABASE}"
+      - "CRAWLER_DB_HOST=${DOCKER_LOCAL_HORSE_RACING_CRAWLER_DB_HOST}"
+      - "CRAWLER_DB_PORT=${DOCKER_LOCAL_HORSE_RACING_CRAWLER_DB_PORT}"
+      - "CRAWLER_DB_USERNAME=${DOCKER_LOCAL_HORSE_RACING_CRAWLER_DB_USERNAME}"
+      - "CRAWLER_DB_PASSWORD=${DOCKER_LOCAL_HORSE_RACING_CRAWLER_DB_PASSWORD}"
+      - "CRAWLER_DB_DATABASE=${DOCKER_LOCAL_HORSE_RACING_CRAWLER_DB_DATABASE}"
+      - "API_PREDICT_URL=${DOCKER_LOCAL_HORSE_RACING_TRADER_API_PREDICT_URL}"
+      - "API_PREDICT_AUTH_USER=${DOCKER_LOCAL_HORSE_RACING_TRADER_API_PREDICT_AUTH_USER}"
+      - "API_PREDICT_AUTH_PASSWORD=${DOCKER_LOCAL_HORSE_RACING_TRADER_API_PREDICT_AUTH_PASSWORD}"
+    depends_on:
+      - "selenium-hub"
+      - "db"
+    restart: always
+
+  db:
+    image: postgres:12
+    volumes:
+      - "${DOCKER_VOLUMES}/local-horse-racing-trader/db:/var/lib/postgresql/data"
+      - "${DOCKER_VOLUMES}/local-horse-racing-trader/wal_archive:/archive"
+    environment:
+      - "POSTGRES_USER=${DOCKER_LOCAL_HORSE_RACING_TRADER_DB_USERNAME}"
+      - "POSTGRES_PASSWORD=${DOCKER_LOCAL_HORSE_RACING_TRADER_DB_PASSWORD}"
+      - "POSTGRES_DB=${DOCKER_LOCAL_HORSE_RACING_TRADER_DB_DATABASE}"
+    restart: always
+
+  chrome:
+    image: selenium/node-chrome-debug
+    ports:
+      - 5900:5900
+    depends_on:
+      - selenium-hub
+    environment:
+      - "HUB_HOST=selenium-hub"
+      - "HUB_PORT=4444"
+    shm_size: 1gb
+    restart: always
+
+  selenium-hub:
+    image: selenium/hub
+    ports:
+      - 4444:4444
+    restart: always
+
+networks:
+  default:
+    external:
+      name: production
