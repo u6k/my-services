@@ -1,25 +1,22 @@
 version: '3'
 
 services:
-  app:
+  rundeck:
     image: u6kapps/rundeck
     environment:
-      - "RDECK_URL=${DOCKER_RDECK_URL}"
-      - "RDECK_ADMIN_USER=${DOCKER_RDECK_ADMIN_USER}"
-      - "RDECK_ADMIN_PASS=${DOCKER_RDECK_ADMIN_PASS}"
-      - "AWS_ACCESS_KEY_ID=${DOCKER_RDECK_S3_ACCESS_KEY}"
-      - "AWS_SECRET_ACCESS_KEY=${DOCKER_RDECK_S3_SECRET_KEY}"
-      - "AWS_DEFAULT_REGION=${DOCKER_RDECK_S3_REGION}"
-      - "AWS_S3_ENDPOINT=${DOCKER_RDECK_S3_URL}"
-      - "VIRTUAL_HOST=${DOCKER_RDECK_VIRTUAL_HOST}"
+      - "TZ=Asia/Tokyo"
+      - "RUNDECK_GRAILS_URL=https://rundeck.u6k.me"
+      - "RUNDECK_TOKENS_FILE=/home/rundeck/etc/tokens.properties"
+      - "JAVA_TOOL_OPTIONS=-Xms1024M -Xmx1024M"
+      - "VIRTUAL_HOST=rundeck.u6k.me"
       - "VIRTUAL_PORT=4440"
-      - "LETSENCRYPT_HOST=${DOCKER_RDECK_LETSENCRYPT_HOST}"
-      - "LETSENCRYPT_EMAIL=${DOCKER_RDECK_LETSENCRYPT_EMAIL}"
+      - "LETSENCRYPT_HOST=rundeck.u6k.me"
+      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "${DOCKER_VOLUMES}/rundeck/projects:/opt/rundeck/projects/"
-      - "${DOCKER_VOLUMES}/rundeck/data:/opt/rundeck/server/data/"
-      - "${DOCKER_VOLUMES}/rundeck/logs:/opt/rundeck/var/logs/"
+      - "${DOCKER_VOLUMES}/rundeck/data:/home/rundeck/server/data"
+      - "./realm.properties:/home/rundeck/server/config/realm.properties"
+      - "./tokens.properties:/home/rundeck/etc/tokens.properties"
+      - "/dev/null:/home/rundeck/etc/rundeckpro-license.key"
     restart: always
 
 networks:
