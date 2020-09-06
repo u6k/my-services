@@ -1,4 +1,0 @@
-#!/bin/sh
-
-curl -I ${RD_OPTION_HEALTHCHECK_URL}
-curl -I -f ${RD_OPTION_HEALTHCHECK_URL}
