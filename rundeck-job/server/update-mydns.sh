@@ -1,1 +1,3 @@
-curl -v -f http://${option.MYDNS_USER}:${option.MYDNS_PASS}@www.mydns.jp/login.html
+#!/bin/bash -eu
+
+curl -v -f http://${RD_OPTION_MYDNS_USER}:${RD_OPTION_MYDNS_PASS}@www.mydns.jp/login.html
