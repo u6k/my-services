@@ -20,20 +20,6 @@ services:
       - "DB_USERNAME=${DOCKER_LOCAL_HORSE_RACING_CRAWLER_DB_USERNAME}"
       - "DB_PASSWORD=${DOCKER_LOCAL_HORSE_RACING_CRAWLER_DB_PASSWORD}"
       - "DB_DATABASE=${DOCKER_LOCAL_HORSE_RACING_CRAWLER_DB_DATABASE}"
-    depends_on:
-      - "db"
-    restart: always
-
-  db:
-    image: postgres:11
-    volumes:
-      - "${DOCKER_VOLUMES}/local-horse-racing-crawler/db:/var/lib/postgresql/data"
-      - "${DOCKER_VOLUMES}/local-horse-racing-crawler/wal_archive:/archive"
-    environment:
-      - "POSTGRES_USER=${DOCKER_LOCAL_HORSE_RACING_CRAWLER_DB_USERNAME}"
-      - "POSTGRES_PASSWORD=${DOCKER_LOCAL_HORSE_RACING_CRAWLER_DB_PASSWORD}"
-      - "POSTGRES_DB=${DOCKER_LOCAL_HORSE_RACING_CRAWLER_DB_DATABASE}"
-    shm_size: 2gb
     restart: always
 
 networks:
