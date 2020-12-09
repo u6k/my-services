@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:12
+    volumes:
+      - "${DOCKER_VOLUMES}/postgresql/data:/var/lib/postgresql/data"
+    environment:
+      - "POSTGRES_USER=${DOCKER_POSTGRESQL_USERNAME}"
+      - "POSTGRES_PASSWORD=${DOCKER_POSTGRESQL_PASSWORD}"
+    shm_size: 2gb
+    restart: always
+
+networks:
+  default:
+    external:
+      name: production

@@ -12,11 +12,16 @@ services:
       - "VIRTUAL_PORT=4440"
       - "LETSENCRYPT_HOST=rundeck.u6k.me"
       - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
+      - "AWS_ACCESS_KEY_ID=access_key"
+      - "AWS_SECRET_ACCESS_KEY=secret_key"
+      - "AWS_S3_ENDPOINT_URL=https://s3.example.com"
     volumes:
       - "${DOCKER_VOLUMES}/rundeck/data:/home/rundeck/server/data"
+      - "${DOCKER_VOLUMES}/rundeck/logs:/home/rundeck/var/logs"
       - "./realm.properties:/home/rundeck/server/config/realm.properties"
       - "./tokens.properties:/home/rundeck/etc/tokens.properties"
       - "/dev/null:/home/rundeck/etc/rundeckpro-license.key"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
     restart: always
 
 networks:
