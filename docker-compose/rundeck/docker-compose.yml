@@ -17,6 +17,7 @@ services:
       - "./realm.properties:/home/rundeck/server/config/realm.properties"
       - "./tokens.properties:/home/rundeck/etc/tokens.properties"
       - "/dev/null:/home/rundeck/etc/rundeckpro-license.key"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
     restart: always
 
 networks:
