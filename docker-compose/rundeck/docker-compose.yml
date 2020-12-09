@@ -17,6 +17,7 @@ services:
       - "AWS_S3_ENDPOINT_URL=https://s3.example.com"
     volumes:
       - "${DOCKER_VOLUMES}/rundeck/data:/home/rundeck/server/data"
+      - "${DOCKER_VOLUMES}/rundeck/logs:/home/rundeck/var/logs"
       - "./realm.properties:/home/rundeck/server/config/realm.properties"
       - "./tokens.properties:/home/rundeck/etc/tokens.properties"
       - "/dev/null:/home/rundeck/etc/rundeckpro-license.key"
