@@ -2,7 +2,7 @@ version: '3'
 
 services:
   notebook:
-    image: jupyter/datascience-notebook
+    image: jupyter/datascience-notebook:python-3.8.8
     user: "root"
     ports:
       - "8888:8888"
@@ -12,8 +12,9 @@ services:
       - "GRANT_SUDO=yes"
     volumes:
       - "${DOCKER_VOLUMES}/jupyter:/home/jovyan/work"
-    command: start-notebook.sh
+    command: start-notebook.sh --ServerApp.password='${JUPYTER_PASSWORD}'
     restart: always
+    shm_size: 1gb
 
 networks:
   default:
