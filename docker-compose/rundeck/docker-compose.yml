@@ -3,25 +3,17 @@ version: '3'
 services:
   rundeck:
     image: u6kapps/rundeck
-    environment:
-      - "TZ=Asia/Tokyo"
-      - "RUNDECK_GRAILS_URL=https://rundeck.u6k.me"
-      - "RUNDECK_TOKENS_FILE=/home/rundeck/etc/tokens.properties"
-      - "JAVA_TOOL_OPTIONS=-Xms1024M -Xmx1024M"
-      - "VIRTUAL_HOST=rundeck.u6k.me"
-      - "VIRTUAL_PORT=4440"
-      - "LETSENCRYPT_HOST=rundeck.u6k.me"
-      - "LETSENCRYPT_EMAIL=u6k.apps@gmail.com"
-      - "AWS_ACCESS_KEY_ID=access_key"
-      - "AWS_SECRET_ACCESS_KEY=secret_key"
-      - "AWS_S3_ENDPOINT_URL=https://s3.example.com"
+    env_file:
+      - ./.env
     volumes:
-      - "${DOCKER_VOLUMES}/rundeck/data:/home/rundeck/server/data"
-      - "${DOCKER_VOLUMES}/rundeck/logs:/home/rundeck/var/logs"
-      - "./realm.properties:/home/rundeck/server/config/realm.properties"
-      - "./tokens.properties:/home/rundeck/etc/tokens.properties"
-      - "/dev/null:/home/rundeck/etc/rundeckpro-license.key"
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - ${DOCKER_VOLUMES}/rundeck/data:/home/rundeck/server/data
+      - ${DOCKER_VOLUMES}/rundeck/logs:/home/rundeck/var/logs
+      - ${DOCKER_VOLUMES}/rundeck/projects:/home/rundeck/projects
+      - ./realm.properties:/home/rundeck/server/config/realm.properties
+      - ./tokens.properties:/home/rundeck/etc/tokens.properties
+      - /dev/null:/home/rundeck/etc/rundeckpro-license.key
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${DOCKER_VOLUMES}/redmine:/mnt/docker-volumes/redmine:ro
     restart: always
 
 networks:

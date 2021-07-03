@@ -1,0 +1,34 @@
+version: "3"
+
+services:
+
+  db:
+    image: mariadb:10.5
+    restart: always
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_bin
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=${DB_DATABASE}
+    volumes:
+      - ${DOCKER_VOLUMES}/linkace/db:/var/lib/mysql
+
+  app:
+    image: linkace/linkace:simple
+    restart: always
+    depends_on:
+      - db
+    volumes:
+      - ./.env:/app/.env
+      - ${DOCKER_VOLUMES}/linkace/files:/app/storage/logs
+    environment:
+      - VIRTUAL_HOST=${DOCKER_VIRTUAL_HOST}
+      - VIRTUAL_PORT=${DOCKER_VIRTUAL_PORT}
+      - LETSENCRYPT_HOST=${DOCKER_LETSENCRYPT_HOST}
+      - LETSENCRYPT_EMAIL=${DOCKER_LETSENCRYPT_EMAIL}
+
+networks:
+  default:
+    external:
+      name: production
