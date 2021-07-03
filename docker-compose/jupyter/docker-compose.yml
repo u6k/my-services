@@ -3,25 +3,15 @@ version: '3'
 services:
   notebook:
     image: ghcr.io/u6k/jupyter:latest
-    user: "root"
+    user: root
     ports:
-      - "8888:8888"
-    environment:
-      - "TZ=Asia/Tokyo"
-      - "JUPYTER_ENABLE_LAB=yes"
-      - "GRANT_SUDO=yes"
-      - "MLFLOW_TRACKING_URI=${MLFLOW_URL}"
-      - "MLFLOW_TRACKING_USERNAME=${MLFLOW_USERNAME}"
-      - "MLFLOW_TRACKING_PASSWORD=${MLFLOW_PASSWORD}"
-      - "MLFLOW_S3_ENDPOINT_URL=${S3_ENDPOINT_URL}"
-      - "AWS_ACCESS_KEY_ID=${S3_ACCESS_KEY}"
-      - "AWS_SECRET_ACCESS_KEY=${S3_SECRET_KEY}"
+      - 8888:8888
     volumes:
-      - "${DOCKER_VOLUMES}/jupyter/work:/home/jovyan/work"
-      - "${DOCKER_VOLUMES}/jupyter/settings:/home/jovyan/.jupyter"
+      - ${DOCKER_VOLUMES}/jupyter/work:/home/jovyan/work
+      - ${DOCKER_VOLUMES}/jupyter/settings:/home/jovyan/.jupyter
     command: start-notebook.sh --ServerApp.password='${JUPYTER_PASSWORD}'
     extra_hosts:
-      - "s3.192.168.local:192.168.3.202"
+      - s3.192.168.local:192.168.3.202
     restart: always
     shm_size: 1gb
 

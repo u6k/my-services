@@ -4,15 +4,8 @@ services:
   app:
     image: minio/minio
     volumes:
-      - "${DOCKER_VOLUMES}/minio/export:/export"
-      - "${DOCKER_VOLUMES}/minio/config:/root/.minio"
-    environment:
-      - "MINIO_ACCESS_KEY=${DOCKER_MINIO_ACCESS_KEY}"
-      - "MINIO_SECRET_KEY=${DOCKER_MINIO_SECRET_KEY}"
-      - "VIRTUAL_HOST=${DOCKER_MINIO_VIRTUAL_HOST}"
-      - "VIRTUAL_PORT=9000"
-      - "LETSENCRYPT_HOST=${DOCKER_MINIO_LETSENCRYPT_HOST}"
-      - "LETSENCRYPT_EMAIL=${DOCKER_MINIO_LETSENCRYPT_EMAIL}"
+      - ${DOCKER_VOLUMES}/minio/export:/export
+      - ${DOCKER_VOLUMES}/minio/config:/root/.minio
     command: server /export
     restart: always
 
