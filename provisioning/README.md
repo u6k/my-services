@@ -30,6 +30,16 @@ git clone https://github.com/u6k/my-services.git
 ansible-playbook debian-for-docker.yml -i localhost, -c local
 ```
 
+### Vimセットアップ
+
+> __TODO:__ Playbookで実行したい
+
+```
+wget https://raw.githubusercontent.com/Shougo/neobundle.vim/master/bin/install.sh
+chmod +x install.sh
+./install.sh
+```
+
 ## Maintainer
 
 - u6k
