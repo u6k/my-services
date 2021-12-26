@@ -53,18 +53,13 @@
       timezone:
         name: Asia/Tokyo
     # Setting NTP
-    - name: Purge ntp
-      apt:
-        name: ntp
-        purge: true
-        state: absent
-    - name: Setting timesyncd
+    - name: Setting chrony
       lineinfile:
-        dest: /etc/systemd/timesyncd.conf
-        line: 'NTP=ntp.ring.gr.jp'
-    - name: Restart timesyncd
+        dest: /etc/chrony/chrony.conf
+        line: 'server ntp.ring.gr.jp iburst'
+    - name: Restart chrony
       service:
-        name: systemd-timesyncd.service
+        name: chrony.service
         state: restarted
     # Install Docker CE
     - name: PreInstall Docker (1/4)
