@@ -9,10 +9,8 @@
 ### 最低限のソフトウェアをインストール
 
 ```
-apt update && apt -y upgrade && apt -y install git python-pip python-apt vim tmux && pip install ansible
+apt update && apt -y upgrade && apt -y --no-install-recommends install git python3-pip python3-apt vim tmux && ln -s /usr/bin/python3 /usr/bin/python && pip install ansible
 ```
-
-> __TODO:__ Ansible v2.7.10のufwモジュールにバグがあるため、2.6系をインストールするとよい。例): `pip install ansible==2.6.16`
 
 他に必要なソフトウェアがある場合は、Ansible Playbookに追加します。
 
@@ -30,6 +28,16 @@ git clone https://github.com/u6k/my-services.git
 
 ```
 ansible-playbook debian-for-docker.yml -i localhost, -c local
+```
+
+### Vimセットアップ
+
+> __TODO:__ Playbookで実行したい
+
+```
+wget https://raw.githubusercontent.com/Shougo/neobundle.vim/master/bin/install.sh
+chmod +x install.sh
+./install.sh
 ```
 
 ## Maintainer
